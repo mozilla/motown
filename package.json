@@ -1,0 +1,22 @@
+{
+  "name": "MoTown",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "feedme": "0.2.2",
+    "express": "2.5.5",
+    "socket.io": "0.8.7",
+    "redis": "0.7.1",
+    "sha1": "0.0.1",
+    "winston": "0.5.6",
+    "ejs": "0.6.1",
+    "semver": "1.0.12",
+    "convict": "0.0.6",
+    "cjson": "0.0.6",
+    "passport": "0.1.x",
+    "passport-browserid": "0.1.x"
+  },
+  "engines": {
+    "node": ">= 0.4.8"
+  }
+}

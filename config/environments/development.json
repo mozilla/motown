@@ -1,0 +1,6 @@
+{
+  "bind_to": {
+    "port": 3000
+  },
+  "public_url": "http://localhost:3000"
+}

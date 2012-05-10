@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this file,
+   - You can obtain one at http://mozilla.org/MPL/2.0/.  -->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>MoTown</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]>
+      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" >
+    <link href="/stylesheets/style.css"   rel="stylesheet" type="text/css" media="screen">
+    
+    <script src="http://code.jquery.com/jquery-1.7.1.min.js" type="text/javascript"></script>
+    <script src="/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="https://browserid.org/include.js" type="text/javascript"></script>
+    <script src="/javascripts/application.js" type="text/javascript"></script>    
+  </head>
+
+  <body class="">
+    <% if (!user) { %>
+      <p>
+      <a href="/">Home</a> | 
+      <a href="/login">Log In</a>
+      </p>
+    <% } else { %>
+      <p>
+      <a href="/">Home</a> | 
+      <a href="/account">Account</a> | 
+      <a href="/logout">Log Out</a>
+      </p>
+    <% } %>
+    <div class="container">    
+
+      <%- body %>
+    </div>
+  </body>
+</html>

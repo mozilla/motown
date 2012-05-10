@@ -74,7 +74,8 @@ http.configure('production', function(){
 routes = {
   site: require('./controllers/site'),
   social: require('./controllers/social'),
-  stories: require('./controllers/stories')
+  stories: require('./controllers/stories'),
+  users: require('./controllers/users')
 };
 
 
@@ -90,6 +91,7 @@ http.get('/social/worker.js', application.authenticate, routes.social.worker);
 http.get('/social/sidebar.js', application.authenticate, routes.social.sidebar);
 
 http.get('/stories', application.authenticate, routes.stories.index);
+http.get('/users', application.authenticate, routes.users.index);
 
 process.on('uncaughtException', function(err) {
   logger.error(err);

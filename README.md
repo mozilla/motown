@@ -81,3 +81,4 @@ social sidebar as well as the socket server.
 
 ## TODOS:
 
+Now see issues: https://github.com/simonwex/motown/issues

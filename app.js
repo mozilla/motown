@@ -6,7 +6,8 @@
 
 
 //TODO: Selectively load app modules based on what kind of server this is...
-const rssBot = require('./app/rss/daemon.js');
-const serializer = require('./app/serializer.js');
-const ircBot = require('./app/irc/daemon.js');
-const httpd = require('./app/http/server.js');
+const 
+rssBot = require('./app/rss/daemon.js');
+serializer = require('./app/serializer.js');
+ircBot = require('./app/irc/daemon.js');
+httpd = require('./app/http/server.js');

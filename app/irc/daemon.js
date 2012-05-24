@@ -314,10 +314,8 @@ function beAGoodLittleWorker(){
       
         break;
     }
+    process.nextTick(beAGoodLittleWorker);
   });
-
-
-  process.nextTick(beAGoodLittleWorker);
 }
 
 beAGoodLittleWorker();

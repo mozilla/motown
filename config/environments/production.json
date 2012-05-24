@@ -1,3 +1,9 @@
 {
-  "public_url": "http://motown.vcap.mozillalabs.com"
+  "public_url": "http://motown1.vm.labs.scl3.mozilla.com/",
+  "public_ws_url": "ws://motown1.vm.labs.scl3.mozilla.com/",
+  "mysql": {
+      "user": "motown",
+      "password": "",
+      "database": "motown"
+  }
 }

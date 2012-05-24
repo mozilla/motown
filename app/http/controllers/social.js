@@ -15,5 +15,5 @@ exports.sidebar = function(req, res){
 
 exports.worker = function(req, res){
   res.header('Content-Type', 'application/javascript');
-  res.render('social/worker.js.ejs', { user: req.user, layout: false });
+  res.render('social/worker.js.ejs', { user: req.user, wsUrl: config.get("public_ws_url"), layout: false });
 };

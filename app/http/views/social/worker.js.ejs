@@ -52,7 +52,7 @@ var handlers = {
   'sidebar.registration': function(data, port){
     sidebarPort = port;
     dump('sidebar.registration completed, connecting to MoTown\n');
-    var motown = new WebSocket("ws://localhost:3000");
+    var motown = new WebSocket("<%= wsUrl%>");
 
     motown.onmessage = function(event){
       var message = JSON.parse(event.data);

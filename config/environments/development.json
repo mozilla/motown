@@ -1,11 +1,12 @@
 {
-    "bind_to": {
-        "port": 3000
-    },
-    "public_url": "http://localhost:3000",
-    "mysql": {
-        "user": "motown",
-        "password": "motown",
-        "database": "motown"
-    }
+  "bind_to": {
+    "port": 3000
+  },
+  "public_url": "http://localhost:3000",
+  "public_ws_url": "ws://localhost:3000",
+  "mysql": {
+    "user": "motown",
+    "password": "motown",
+    "database": "motown"
+  }
 }

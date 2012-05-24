@@ -10,9 +10,10 @@ config = require('../../../lib/configuration');
  * GET home page.
  */
 exports.sidebar = function(req, res){
-  res.render('social/sidebar', { user: req.user });
+  res.render('social/sidebar', { user: req.user, layout: false });
 };
 
 exports.worker = function(req, res){
-  res.render('social/worker.js.ejs', { user: req.user });
+  res.header('Content-Type', 'application/javascript');
+  res.render('social/worker.js.ejs', { user: req.user, layout: false });
 };

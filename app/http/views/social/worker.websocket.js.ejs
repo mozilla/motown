@@ -1,0 +1,69 @@
+function log(message, angry){
+  if (typeof(message.join) == 'function'){
+    message = message.join("\n");
+  }
+  if (angry)
+    dump("\n\n\n\n\n");
+  
+  dump(message + "\n");
+
+  if (angry)
+    dump("\n\n\n\n\n");
+}
+
+importScripts(['/javascripts/socket.io.webworker.js']);
+
+log(["io is set if: ", io], true);
+
+
+WebSocket = WebSocket || MozWebSocket;
+
+var socket = new WebSocket("ws://localhost:3000/socket.io");
+
+log(["here be mah socket: ", socket]);
+
+socket.onopen = function(){
+  log("we be open!");
+}
+
+// Side-bar stuff
+var apiPort = null;
+var sidebarPort = null;
+
+var handlers = {
+  'social.port-closing': function(data, port){
+    if (apiPort == port){
+      apiPort.close();
+      apiPort = null;
+    }
+  },
+  'social.initialize': function(data, port){
+    dump('social.initialize on port ' + JSON.stringify(port) + '\n');
+    apiPort = port;
+    //TODO: Swap to websockets
+  },
+  'sidebar.registration': function(data, port){
+    sidebarPort = port;
+  },
+  'social.cookie-changed': function(data){},
+}
+var ports = [];
+onconnect = function(e) {
+  var port = e.ports[0];
+  port.onmessage = function (e) {
+    var msg = e.data;
+    var handler = handlers[msg.topic];
+
+    if (handler == null){
+      dump("No handler found for " + msg.topic + "\n");
+    }
+    else{
+      handler(msg, port);
+    }
+  }
+  inbound = e.ports[0];
+  if (e.ports.size > 1)
+    outbound = e.ports[1];
+  else
+    outbound = inbound;
+}

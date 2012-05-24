@@ -1,0 +1,36 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+}
+
+body.profile #container{
+  padding-top: 10px;
+}
+body.profile #photo img{
+  margin-top: 15px;
+}
+
+body.profile #networks ul {
+  width: 278px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  list-style-type: none;
+  margin: 0;
+}
+
+body.profile #networks li {
+  line-height: 18px;
+  color: #555;
+  padding: 4px;
+}
+
+body.profile #networks li {
+  border-bottom: 1px solid #ccc;
+}
+body.profile #networks li:last-child {
+  border-bottom: none;
+}

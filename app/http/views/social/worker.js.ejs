@@ -1,0 +1,104 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+
+/*
+ * 
+ * Here's how this is all supposed to work:
+ * 1. We wire up the handlers and such
+ * 2. We wait for the event "sidebar.registration"
+ * 3. We make an outbound connection to motown a la websocket.
+ *    a) MoTown sends us a bunch of feed.story messages
+ *    b) We send those to the sidebar.
+ */
+
+
+// Make sure we have the right WebSocket class.
+WebSocket = WebSocket || MozWebSocket;
+
+function log(message, angry){
+  if (typeof(message.join) == 'function'){
+    message = message.join("\n");
+  }
+  if (angry)
+    dump("\n\n\n");
+  
+  dump(message + "\n");
+
+  if (angry)
+    dump("\n\n\n");
+}
+
+var handlers = {
+  'feed.story': function(story){
+    // dump("Sending message to sidebar. (port: " + sidebarPort + ")\n\tStory to send: " + JSON.stringify(story) + "\n\n");
+    sidebarPort.postMessage({topic: 'feed.story', data: story});
+  },
+  'contacts.list': function(contactList){
+    sidebarPort.postMessage({topic: 'contacts.list', data: contactList});
+  },
+  'social.port-closing': function(data, port){
+    if (apiPort == port){
+      apiPort.close();
+      apiPort = null;
+    }
+  },
+  'social.initialize': function(data, port){
+    dump('social.initialize on port ' + JSON.stringify(port) + '\n');
+    apiPort = port;
+    //TODO: Swap to websockets
+  },
+  'sidebar.registration': function(data, port){
+    sidebarPort = port;
+    dump('sidebar.registration completed, connecting to MoTown\n');
+    var motown = new WebSocket("ws://localhost:3000");
+
+    motown.onmessage = function(event){
+      var message = JSON.parse(event.data);
+
+      var handler = handlers[message['topic']];
+
+      if (handler == null){
+        dump("No handler found for " + message.topic + " from socket.\n");
+      }
+      else{
+        // log(["Message from motown: ", JSON.stringify(message)]);
+        handler(message.data);
+      }
+    };
+    motown.onopen = function(){
+      log("Connected to MoTown!", true);
+    };
+    motown.onclose = function(){
+      //TODO: Put sidebar in "disconnected" state and try to reconnect
+    };
+  },
+  'social.cookie-changed': function(data){},
+};
+
+
+// Side-bar stuff
+var apiPort = null;
+var sidebarPort = null;
+
+var ports = [];
+onconnect = function(e) {
+  var port = e.ports[0];
+  port.onmessage = function (e) {
+    var msg = e.data;
+    var handler = handlers[msg.topic];
+
+    if (handler == null){
+      dump("No handler found for " + msg.topic + "\n");
+    }
+    else{
+      handler(msg, port);
+    }
+  }
+  inbound = e.ports[0];
+  if (e.ports.size > 1)
+    outbound = e.ports[1];
+  else
+    outbound = inbound;
+}

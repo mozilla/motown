@@ -1,0 +1,61 @@
+<h1>Your Profile <span id="changes_saved" class="label label-success" style="display:none"></span></h1>
+
+<div id="container" class="row">
+  <div id="photo" class="span3">
+    <div class="thumbnail">
+      <img src="<%= user.getGravatarUrl(170) %>" width="170" height="170" />
+      <div class="caption">
+        <p>
+          Image loaded from <a href="http://gravatar/">Gravatar</a>
+          <p><a href="http://en.gravatar.com/emails/" target="_NEW" class="btn btn-primary">Manage</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  <div id="details" class="span8" style="background-color: white">
+    <p>
+      MoTown uses IRC to update your availability and status. Currently we're 
+      only supporting this on <a href="irc://irc.mozilla.org">irc.mozilla.org</a>.
+    </p>
+    <form id="user_form" class="form-horizontal">
+        <fieldset>
+          <div class="control-group">
+            <label class="control-label" for="user_nick">IRC Nick</label>
+            <div class="controls">
+              <input class="input-xlarge focused" id="user_nick" name="user[nick]" type="text" value="<%= user.nick %>" placeholder="Nick">
+              <p class="help-block">We only support irc://irc.mozilla.org</p>
+            </div>
+          </div>
+          <div class="control-group">
+            <label class="control-label" for="source_from_irc">Use IRC for Public Details:</label>
+            <div class="controls">
+              <label class="checkbox">
+                <input type="checkbox" id="source_from_irc" value="checked">
+              </label>
+            </div>
+          </div>
+
+          <div class="control-group">
+            <label class="control-label" for="name">Real Name</label>
+            <div class="controls">
+              <input class="input-xlarge" id="user_real_name" name="user[realName]" type="text" value="<%= user.realName %>" placeholder="Real Name">
+              <p id="error_contacting_nickserv" style="display:none" class="help-block alert-error">
+                Error contacting NickServ. Please set your Real Name manually.
+              </p>
+            </div>
+          </div>
+          
+          <div id="networks" class="control-group" style="display: none;">
+            <label class="control-label">Networks</label>
+            <div class="controls">
+              <ul>
+                <li>#vancouver</li>
+                <li>#b2g</li>
+              </ul>
+              <span class="help-inline">These are maintained by IRC</span>
+            </div>
+          </div>
+        </fieldset>
+      </form>
+  </div>
+</div>

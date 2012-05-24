@@ -1,0 +1,11 @@
+{
+  "services": {
+    "social": {
+      "name": "MoTown",
+      "iconURL": "resource://socialdev/providers/motown/firefox-icon.png",
+      "workerURL": "http://localhost:3000/social/worker.js",
+      "sidebarURL": "http://localhost:3000/social/sidebar",
+      "URLPrefix": "http://localhost:3000"
+    }
+  }
+}

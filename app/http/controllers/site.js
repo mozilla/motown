@@ -12,9 +12,8 @@ config = require('../../../lib/configuration');
 exports.index = function(req, res){
   res.render('site/index', { user: req.user });
 };
-exports.login = function(req, res){
-  res.render('site/login', { user: req.user });
-};
+
+
 // POST /auth/browserid
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request.  BrowserID authentication will verify the assertion obtained from

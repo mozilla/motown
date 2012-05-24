@@ -1,0 +1,70 @@
+var socket = new WebSocket("ws://localhost:8000/socket/server/startDaemon.php");  
+
+dump("Hello from the worker\n\n\n");
+
+importScripts(['/socket.io/socket.io.js']);
+// dump("Imported Scripts");
+dump("\n\n\nSocket IO: ");
+dump(io);
+
+
+dump("\n\n\n our lovely socket:");
+var socket = io.connect('http://localhost:3000');
+dump(socket);
+dump("\n\n\n");
+
+socket.on('news', function (data) {
+  console.log(data);
+  socket.emit('my other event', { my: 'data' });
+});
+
+//TODO: dynamically write external URL from config (pass through)
+// var server = new WebSocket('ws://localhost:3000');
+// server.onopen = function(event) {
+//   server.onmessage = function (event) {  
+//     console.log(event.data);  
+//   } 
+// }
+
+// Side-bar stuff
+var apiPort = null;
+var sidebarPort = null;
+
+var handlers = {
+  'social.port-closing': function(data, port){
+    if (apiPort == port){
+      apiPort.close();
+      apiPort = null;
+    }
+  },
+  'social.initialize': function(data, port){
+    dump('social.initialize on port ' + JSON.stringify(port) + '\n');
+    apiPort = port;
+    //TODO: Swap to websockets
+    poll();
+  },
+  'sidebar.registration': function(data, port){
+    sidebarPort = port;
+  },
+  'social.cookie-changed': function(data){},
+}
+var ports = [];
+onconnect = function(e) {
+  var port = e.ports[0];
+  port.onmessage = function (e) {
+    var msg = e.data;
+    var handler = handlers[msg.topic];
+
+    if (handler == null){
+      dump("No handler found for " + msg.topic + "\n");
+    }
+    else{
+      handler(msg, port);
+    }
+  }
+  inbound = e.ports[0];
+  if (e.ports.size > 1)
+    outbound = e.ports[1];
+  else
+    outbound = inbound;
+}

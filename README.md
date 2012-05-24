@@ -20,13 +20,12 @@ The IRC Daemon listens on a couple queues in Redis to service requests.
 This performs a whois lookup on irc.mozilla.org and returns the results 
 to the specified Redis queue.
 
-<code>
+<pre>
 redis> lpush irc:whois "[\"wex\", \"irc-resp:1\"]"
 
 redis> lpop irc-resp:1
-
 "{\"nick\":\"wex\",\"user\":\"simon\",\"host\":\"moz-A6711922.bchsia.telus.net\",\"realname\":\"Simon Wex\",\"channels\":[\"#motown\",\"#b2g\",\"#vancouver\",\"#webdev\",\"#webpagemaker\",\"#socialdev\",\"#identity\",\"#learning\",\"#openwebapps\",\"#labs\"],\"server\":\"concrete.mozilla.org\",\"serverinfo\":\"Phoenix, Arizona, USA\",\"idle\":\"2763\"}"
-</code>
+</pre>
 
 ##### irc:updateUserStatusFromId (user.id, responseQueue)
 

@@ -1,4 +1,7 @@
 {
+  "irc": {
+    "nick": "motown-dev"
+  },
   "bind_to": {
     "port": 3000
   },

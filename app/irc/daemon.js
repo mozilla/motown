@@ -44,9 +44,9 @@ var channels = {}; // {'#channel': [<user.id>, ...], ...}
 
  //TOOD: Figure out a better way to bootstrap. -- Currently, I'm just making sure I join #motown
 
-var bot = new irc.Client('irc.mozilla.org', 'motown', {
+var ircConfig = config.get('irc');
+var bot = new irc.Client(ircConfig.server, ircConfig.nick, {
   debug: false,
-  userName: 'motown',
   realName: 'Non-archiving MoTown bot',
   channels: ['#motown']
 });

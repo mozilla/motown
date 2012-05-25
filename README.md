@@ -6,6 +6,22 @@ MoTown consists of four primary services. Each of these services can be
 run independantly as they communicate through a combination of Redis
 queues, published Redis events and MySQL.
 
+## Installation
+
+* `npm install`
+* install mysql, start server
+* database config, env't vars, etc.
+* `NODE_ENV=development ./app.js`
+
+## Configuration
+
+## Database Notes
+
+* uses mysql
+* creates X tables: networks, ...
+
+
+
 ### IRC Daemon
 
 The IRC Daemon connects to irc.mozilla.org tracks the NICK changes of 

@@ -54,6 +54,10 @@
           });
           $('.feed ul').prepend(li);
           li.show();
+
+          while($('.feed ul li').length > 30){
+            $('.feed ul li:last').remove();
+          }
         },
         'contacts.list': function(data){
           for (var i in data){

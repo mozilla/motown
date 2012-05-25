@@ -32,7 +32,7 @@ CREATE TABLE feeds (
   created_at  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (url, user_id)
-  KEY index_feeds_on_url (url)
+  KEY index_feeds_on_url (url),
   KEY index_feeds_on_verified (verified);
 ) ENGINE=InnoDB;
 

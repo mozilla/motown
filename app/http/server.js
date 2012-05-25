@@ -44,13 +44,28 @@ passport.use(new BrowserID({
         return done(null, user);
       }
       else{
+        // This means it's the first time the user has even logged in.
+        // TODO: Wrap this up into the user model.
         user = new User({'email': email});
         user.save(function(err, user){
           if (err){
             logger.error("Error saving user after login (" + email + ")");
           }
           else{
-            return done(null, user);
+            // TODO: Make this configurable:
+            mysql.query(
+              "INSERT INTO feeds (url, user_id, title, verified) VALUES \
+               (?, ?, ?, ?), (?, ?, ?, ?)",
+              [
+               'http://blog.mozilla.org/feed/', user.id, 'The Mozilla Blog', true,
+               'http://blog.mozilla.org/labs/feed/', user.id, 'Mozilla Labs', true
+              ],
+              function(err){
+                if (err)
+                  logger.error("Error while setting default feeds: " + err);
+                return done(null, user);
+              }
+            );
           }
         });
       }

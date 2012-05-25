@@ -33,7 +33,7 @@ CREATE TABLE feeds (
 
   PRIMARY KEY (url, user_id)
   KEY index_feeds_on_url (url),
-  KEY index_feeds_on_verified (verified);
+  KEY index_feeds_on_verified (verified)
 ) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS users;

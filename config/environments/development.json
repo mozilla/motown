@@ -11,5 +11,8 @@
     "user": "motown",
     "password": "motown",
     "database": "motown"
+  },
+  "social_provider": {
+    "name_suffix": "-dev"
   }
 }

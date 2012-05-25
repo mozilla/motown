@@ -57,7 +57,7 @@ bot.addListener('error', function(error){
 
 function bootstrap(){
   mysql.query(
-    "SELECT id, nick FROM users WHERE nick is not null",
+    "SELECT id, nick FROM users WHERE nick is not null and nick <> ''",
     function(err, rows){
       if (!err){
         for(var i in rows){

@@ -1,19 +1,36 @@
 # Welcome to MoTown
 
-## MoTown Runtime
+## Installation (for dev)
 
-MoTown consists of four primary services. Each of these services can be 
-run independantly as they communicate through a combination of Redis
-queues, published Redis events and MySQL.
+This is all in the MoTown directory:
 
-## Installation
+1. Install Redis
+2. Install and start MySQL
+3. Create a database:
+<pre>
+$     > mysql
+mysql > create database motown;
+mysql > create user motown;
+mysql > grant all on motown.* to 'motown'@'localhost' identified by 'motown';
+mysql > exit
+</pre>
+4. Create tables:
+<pre>
+$> cat config/database.sql | mysql -umotown -p motown
+</pre>
+5. Install node packages:
+<pre>
+$ > cd <motown directory>
+$ > npm install
+</pre>
+6. Start MoTown Runtime:
 
-* `npm install`
-* install mysql, start server
-* database config, env't vars, etc.
-* `NODE_ENV=development ./app.js`
+<pre>
+$ > NODE_ENV=development ./app.js 
+</pre>
 
 ## Configuration
+
 
 ## Database Notes
 
@@ -21,6 +38,11 @@ queues, published Redis events and MySQL.
 * creates X tables: networks, ...
 
 
+## MoTown Runtime
+
+MoTown consists of four primary services. Each of these services can be 
+run independantly as they communicate through a combination of Redis
+queues, published Redis events and MySQL.
 
 ### IRC Daemon
 

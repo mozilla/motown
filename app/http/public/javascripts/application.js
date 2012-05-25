@@ -3,7 +3,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var DATA = {
-  profile: {},
+  profile: {}
 }
 
 $(function(){
@@ -98,6 +98,99 @@ $(function(){
       });
       $('#user_nick').change(postNick);
         
+      break;
+    case '/feeds':
+      $('.feeds #new_feed_form').click(function(){
+        createBlankFeedForm();
+        return false;
+      });
+
+      function deleteUrl(){
+        var form = $(this).parent();
+
+        if (!form.hasClass('verified') && !form.hasClass('error')){
+          // This hasn't been serialized yet.
+          form.parent().remove();
+        }
+        $.ajax({
+          type: 'DELETE',
+          url: '/feeds/feed',
+          data: form.serialize(),
+          success: function(){
+            form.parent().remove();
+          },
+          error: function(){
+            console.log("Error removing");
+          }
+        });
+        console.log();
+        return false;
+      }
+
+      $('.feeds form .delete').click(deleteUrl);
+
+      function validateAndSaveUrl(){
+        var form = $(this).parent();
+
+        form
+          .removeClass('verified')
+          .removeClass('error')
+          .find('.delete').hide();
+        console.log(form.serialize());
+        var reqData = form.serialize();
+
+        form.find('input[type=hidden]').val($(this).val());
+
+        $.ajax({
+          type: 'POST',
+          url: '/feeds/feed',
+          data: reqData,
+          success: function(data){
+            console.log(data);
+            if (data.url == ""){
+              form.remove();
+            }
+            if (data.verified){
+              form.addClass('verified');
+              if($('input[name=url][value=]').length == 0){
+                createBlankFeedForm();
+              }
+            }
+            else{
+              form.addClass('error');
+            }
+            form.find('.delete').show();
+            form.find('input[type=text]').attr('title', data.title);
+          },
+          error: function(){
+            //TODO: Do something intelligent in the UI.
+            console.log("Error persisting element");
+          }
+        });
+      }
+
+      $('.feeds form input[name=url]').change(validateAndSaveUrl);
+
+      // $('input[value="Whatever"]');
+      var template = $('#feed_template');
+      template.removeAttr('id').remove();
+
+      function createBlankFeedForm(){
+        var blankInput = $('.feeds input[type=text][value=]');
+
+        if (blankInput.length > 1){
+          blankInput.focus();
+          return;
+        }
+        var newFeed = template.clone();
+        newFeed.find('input[name=url]').change(validateAndSaveUrl);
+        newFeed.find('.delete').click(deleteUrl);
+        $('ul.feeds').append(newFeed);
+        newFeed.show();
+      }
+
+      createBlankFeedForm();
+
       break;
   }
   

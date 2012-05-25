@@ -24,16 +24,19 @@ CREATE TABLE networks (
   KEY index_networks_on_bot_update_id (bot_update_id)
 ) ENGINE=InnoDB;
 
-
 DROP TABLE IF EXISTS feeds;
 CREATE TABLE feeds (
   url         VARCHAR(255)  NOT NULL,
   user_id     INT           NOT NULL,
-  created_at  DATETIME      NOT NULL,
+  title       VARCHAR(255)  NULL,
+  verified    BOOLEAN               DEFAULT 0,
+  type        VARCHAR(255)  NULL,
+  created_at  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (url, user_id)
+  KEY index_feeds_on_url (url)
+  KEY index_feeds_on_verified (verified);
 ) ENGINE=InnoDB;
-
 
 DROP TABLE IF EXISTS users;
 CREATE TABLE users (

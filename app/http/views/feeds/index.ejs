@@ -1,0 +1,36 @@
+<h1>Your Feeds <span id="changes_saved" class="label label-success" style="display:none"></span></h1>
+
+<p>
+  MoTown uses RSS feeds to keep you updated. We've filled in a couple of examples for you:
+</p>
+
+<div class="feedcontainer">
+  <ul class="feeds">
+    <% for (var i in feeds){
+      var feed = feeds[i];
+      %>
+      <li>
+        <form class="well form-inline <%= feed.verified ? 'verified' : 'error' %>">
+          <a class="btn btn-success" href="#"><i class="icon-ok-sign icon-white"></i></a>
+          <a class="btn btn-danger btn-error" href="#"><i class="icon-remove-sign icon-white"></i></a>
+          <input type="text" name="url" class="input-xxlarge" placeholder="URL" title="<%= feed.title %>" value="<%= feed.url%>">
+          <input type="hidden" name="previousUrl" value="<%= feed.url%>">
+          <a class="btn btn-danger delete" href="#"><i class="icon-trash icon-white"></i> Delete</a>
+        </form>    
+      </li>
+    <% } %>
+    <li id="feed_template" style="display:none">
+      <form class="well form-inline">
+        <a class="btn btn-success btn-error" href="#"><i class="icon-ok-sign icon-white"></i></a>
+        <a class="btn btn-danger btn-error" href="#"><i class="icon-remove-sign icon-white"></i></a>
+        <input type="text" name="url"  class="input-xxlarge" placeholder="URL">
+        <input type="hidden" name="previousUrl">
+        <a class="btn btn-danger delete" href="#"><i class="icon-trash icon-white"></i> Delete</a>
+      </form>    
+    </li>
+  </ul>
+  <div class="well feeds">
+    <a href="#" id="new_feed_form" class="btn btn-primary"><i class="icon-forward icon-white"></i>New</a>
+  </div>
+  
+</div>

@@ -118,8 +118,10 @@ http.get('/profile', application.authenticate, routes.profile.index.get);
 http.put('/profile', application.authenticate, routes.profile.index.put);
 http.post('/profile/nick',  application.authenticate, routes.profile.nick.post);
 
-http.get('/feeds', application.authenticate, routes.feeds.index.get);
 
+http.get('/feeds',          application.authenticate, routes.feeds.index.get);
+http.post('/feeds/feed',    application.authenticate, routes.feeds.feed.post);
+http.delete('/feeds/feed',  application.authenticate, routes.feeds.feed.delete);
 
 process.on('uncaughtException', function(err) {
   logger.error(err);

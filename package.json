@@ -5,6 +5,7 @@
   "dependencies": {
     "mime": "1.2.x",
     "feedme": "0.2.2",
+    "feedparser": "0.9.x",
 
     "clarinet": "0.5.x",
     "JSV": "4.0.x",

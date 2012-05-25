@@ -34,3 +34,40 @@ body.profile #networks li {
 body.profile #networks li:last-child {
   border-bottom: none;
 }
+body.feeds ul.feeds input[type=text]{
+  width: 630px;
+}
+body.feeds div.feeds {
+  display: inline;
+  margin-left: 25px;
+}
+body.feeds ul.feeds {
+  width: 805px;
+  list-style-type: none;
+  margin-bottom: 35px;
+}
+
+body.feeds ul.feeds form{
+  padding-left: 59px;
+}
+body.feeds ul.feeds form.verified, body.feeds ul.feeds form.error {
+  padding-left: 19px;
+}
+body.feeds ul.feeds .btn-success, body.feeds ul.feeds .btn-error {
+  display: none;
+}
+body.feeds ul.feeds .verified .btn-success, body.feeds ul.feeds .error .btn-danger {
+  display: inline;
+}
+
+body.feeds .feedcontainer {
+  min-height: 200px;
+  padding-bottom: 100px;
+  background-repeat: no-repeat;
+  background-position: 100% 100%;
+  background-image: url('/images/rss-bot-montage.jpg');
+}
+
+body.feeds form.well {
+  background-color: rgba(245, 245, 245, 0.8);
+}

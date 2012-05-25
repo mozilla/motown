@@ -99,7 +99,8 @@ http.configure('production', function(){
 routes = {
   site:     require('./controllers/site'),
   social:   require('./controllers/social'),
-  profile:  require('./controllers/profile')
+  profile:  require('./controllers/profile'),
+  feeds:    require('./controllers/feeds')
 };
 
 
@@ -116,6 +117,8 @@ http.get('/social/manifest.json', routes.social.manifest);
 http.get('/profile', application.authenticate, routes.profile.index.get);
 http.put('/profile', application.authenticate, routes.profile.index.put);
 http.post('/profile/nick',  application.authenticate, routes.profile.nick.post);
+
+http.get('/feeds', application.authenticate, routes.feeds.index.get);
 
 
 process.on('uncaughtException', function(err) {

@@ -1,6 +1,6 @@
 {
-  "public_url": "http://motown1.vm.labs.scl3.mozilla.com/",
-  "public_ws_url": "ws://motown1.vm.labs.scl3.mozilla.com/",
+  "public_url": "https://motown-dev.mozillalabs.com/",
+  "public_ws_url": "ws://motown-dev.mozillalabs.com/",
   "mysql": {
       "user": "motown",
       "password": "",

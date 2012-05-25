@@ -22,10 +22,10 @@ exports.index = {
     req.user.save(function(err){
       if (err){
         logger.error("Error saving user in profile.js:" + err);
-        res.send('ERROR', {status: 500});
+        res.send('"ERROR"', {status: 500});
       }
       else{
-        res.send('OK');
+        res.send('"OK"');
       }
     });
   }

@@ -39,13 +39,13 @@
           var li = storyTemplate.clone();
           li.attr('id', data.id);
           dump(data.id + "\n");
-          if (data['media:thumbnail']){
-            li.find('img.thumbnail').attr('src', data['media:thumbnail'].url);
+          if (data['image']){
+            li.find('img.thumbnail').attr('src', data.image.url).attr('alt', data.image.title);
           }
           else{
             li.find('img.thumbnail').remove();
           }
-          li.find('p').text(data.description);
+          li.find('p').text(data.title);
           li.click(function(){
             window.open(data.href, "motown_sidebar");
           });

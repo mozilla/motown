@@ -5,24 +5,27 @@
 
 var 
 logger = require('winston'),
-sha1 = require('sha1');
+crypto = require('crypto');
+
+
 
 require('../../lib/extensions/number');
 
 
 // TODO:  "value", This should be backed by a linked-list in redis, mysql or some 
-//		    method that doesn't just exist in memory. A bloom filter could be 
+//		    method that isn't volatile  doesn't just exist in memory. A bloom filter could be 
 //        nice.
 
 // TODO: This could use some tests
 
-module.exports = function(){
+module.exports = function(ageWindow){
   this.keys = {};
 
   this.hasntHeardOf = function(key){
     return (!(key in this.keys));
   }
   this.add = function(key){
+    key = crypto.createHash('md5').update(key).digest();
     if (!(key in this.keys))
       this.keys[key] = new Date();
 
@@ -32,7 +35,7 @@ module.exports = function(){
     logger.debug('Pruning!');
     for (var key in this.keys){
       //TODO: Go back to 1 hour
-      if (new Date() - this.keys[key] > (30).hour()){
+      if (new Date() - this.keys[key] > ageWindow){
         logger.debug('Removing key: ' + key);
         delete this.keys[key];
       }

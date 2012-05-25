@@ -21,17 +21,16 @@ User              = require('../models/user');
 mysql             = require('mysql').createClient(config.get('mysql'));
 
 var
-connections = {}, // {'email@domain': [conn, conn], ...}
+connections = {}, // {<userId>: [conn, conn], ...}
 socket = null,
 io = null;
 
 
-//TODO: Swap email over to be id.
 
-function sendMessageToEachConnectionByEmail(email, message){
-  if (email in connections){
-    for (var i in connections[email]){
-      var conn = connections[email][i];
+function sendMessageToUser(userId, message){
+  if (userId in connections){
+    for (var i in connections[userId]){
+      var conn = connections[userId][i];
       conn.sendUTF(message);
     }
   }
@@ -40,13 +39,13 @@ function sendMessageToEachConnectionByEmail(email, message){
 /*
  * Story Stuff: This should really get rolled up into a model.
  */
-function sendStoryToUser(story, user){
+function sendStoryToUser(story, userId){
   var message = JSON.stringify({
     topic: 'feed.story',
     data: story
   });
 
-  sendMessageToEachConnectionByEmail(user, message);
+  sendMessageToUser(userId, message);
 }
 
 function subscribeForStories(){
@@ -58,7 +57,7 @@ function subscribeForStories(){
       if (channel == "stories"){
         var data = JSON.parse(message);
         
-        var users = data.users;
+        var users = data.userIds;
         for (var i in users){
           if (users[i] in connections){
             sendStoryToUser(data.story, users[i]);
@@ -72,8 +71,7 @@ function subscribeForStories(){
   });
 }
 
-// TODO: remove email when connections indexes by id
-function sendContactListToUser(userId, email){
+function sendContactListToUser(userId){
 
   mysql.query(
     "SELECT DISTINCT \
@@ -96,7 +94,7 @@ function sendContactListToUser(userId, email){
       if (err)
         logger.error(err);
 
-      if (rows && rows.length > 0){
+      if (rows && rows.length){
         var contacts = [];
         for (var i in rows){
           contacts.push({
@@ -107,7 +105,7 @@ function sendContactListToUser(userId, email){
           });
         }
 
-        sendMessageToEachConnectionByEmail(email, JSON.stringify({topic: 'contacts.list', data: contacts}));
+        sendMessageToUser(userId, JSON.stringify({topic: 'contacts.list', data: contacts}));
       }
     }
   );
@@ -115,13 +113,15 @@ function sendContactListToUser(userId, email){
 
 function userConnected(user){
   //TODO: Switch to using ids for stories
-  mysql.query("SELECT * FROM stories where user = ? ORDER BY created_at DESC LIMIT 30", [user.email], function(err, rows){
-    logger.debug(rows.length + ' stories found for user.');
+  mysql.query("SELECT * FROM stories where user_id = ? ORDER BY published_at DESC LIMIT 30", [user.id], function(err, rows){
+    logger.debug(parseInt(rows || rows.length) + ' stories found for user.');
 
-    //We do this backwards because we want the most recent 30, from sql, but the oldest first
-    for(var i = rows.length; i > 0; i--){
-      var story = JSON.parse(rows[i-1].data);
-      sendStoryToUser(story, user.email);
+    for(var i in rows){
+      // To make sure we sen the last one first.
+      i = rows.length - i - 1;
+      var story = JSON.parse(rows[i].data);
+      console.log(rows[i].published_at);
+      sendStoryToUser(story, user.id);
     }
   });
   
@@ -135,7 +135,7 @@ function userConnected(user){
       logger.error("Timeout exceeded waiting for IRC daemon to update user: " + user.id);
 
     // Even if we get an error, we try to do our magic.
-    sendContactListToUser(user.id, user.email);
+    sendContactListToUser(user.id);
   });
 }
 
@@ -181,14 +181,15 @@ module.exports = {
 
           var user = User.find(session.passport.user, function(err, user){
 
-            connection.user = user.email;
+            connection.userId = user.id;
+            connection.email = user.email;
             connection.sessionID = sessionID;
 
-            if (!connections[user.email]){
-              connections[user.email] = [];
+            if (!connections[user.id]){
+              connections[user.id] = [];
             }
 
-            connections[user.email].push(connection);
+            connections[user.id].push(connection);
 
             logger.debug(user.email + " connected");
 

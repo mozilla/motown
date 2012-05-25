@@ -1,17 +1,15 @@
-# TODO: Swap stories user (aka email) for user_id
 DROP TABLE IF EXISTS stories;
 CREATE TABLE stories (
-  id          VARCHAR(255)  NOT NULL,
-  data        TEXT          NOT NULL,
-  type        VARCHAR(255)            DEFAULT NULL,
-  user        VARCHAR(255)            DEFAULT NULL,
-  created_at  TIMESTAMP     NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+  id           VARCHAR(255)  NOT NULL,
+  data         TEXT          NOT NULL,
+  user_id      INT           NOT NULL,
+  published_at DATETIME     NOT NULL,
+  created_at   TIMESTAMP     NOT NULL  DEFAULT CURRENT_TIMESTAMP,
 
-  PRIMARY KEY (id, user),
-  KEY index_stories_on_user (user),
-  KEY index_stories_on_type (type),
-  KEY index_stories_on_created_at (created_at)
-) ENGINE=InnoDB;
+  PRIMARY KEY (id, user_id),
+  KEY index_stories_on_user_id    (user_id),
+  KEY index_stories_on_published_at (published_at)
+  ) ENGINE=InnoDB;
 
 DROP TABLE IF EXISTS networks;
 CREATE TABLE networks (

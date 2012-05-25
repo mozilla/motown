@@ -17,13 +17,10 @@ mysql   = require('mysql').createClient(config.get('mysql'));
 redis.debug_mode = false;
 
 // {
-//     "users": [
-//         "simon@simonwex.com",
-//         "swex@mozilla.com"
-//     ],
+//     "userIds": [ 13, 14 ],
 //     "story": {
 //         "id": "tag:github.com,2008:IssuesEvent/1553175060",
-//         "description": "jbonacci opened issue 1607 on mozilla/browserid",
+//         "title": "jbonacci opened issue 1607 on mozilla/browserid",
 //         "people": [
 //             {
 //                 "name": "jbonacci",
@@ -31,10 +28,9 @@ redis.debug_mode = false;
 //             }
 //         ],
 //         "href": "https://github.com/mozilla/browserid/issues/1607",
-//         "published": "2012-05-17T17:20:12Z",
-//         "media:thumbnail": {
-//             "height": "30",
-//             "width": "30",
+//         "pubdate": "2012-05-17T17:20:12Z",
+//         "image": {
+//             "title": "a photo of me (aka the alt)",
 //             "url": "https://secure.gravatar.com/avatar/ef049ef74c1c0323b925195e7b7cc9e7?s=30&d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-140.png"
 //         }
 //     }
@@ -62,15 +58,15 @@ function waitForStory(){
         logger.error(err);
     });
 
-    var users = story.users;
+    var userIds = story.userIds;
     story = story.story;
 
-    for (var i in users){
-      var user = users[i];
+    for (var i in userIds){
+      var userId = userIds[i];
 
       // Persist the story to MySQL
       mysql.query(
-        'REPLACE INTO stories SET id=?, data=?, user=?', [story.id, JSON.stringify(story), user],
+        'REPLACE INTO stories SET id = ?, data = ?, user_id = ?, published_at = ?', [story.id, JSON.stringify(story), userId, story.pubdate],
         function(err, data){
           // TODO: Handle error wisely 
           if (err)

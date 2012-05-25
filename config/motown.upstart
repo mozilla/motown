@@ -1,0 +1,14 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this file,
+# You can obtain one at http://mozilla.org/MPL/2.0/.
+
+description     "Ubuntu Start Script for the main MoTown runtime"
+author          "Simon Wex <swex@mozilla.com>"
+
+stop on runlevel 0
+stop on runlevel 1
+stop on runlevel 6
+
+console output
+
+exec /opt/motown/app.js

@@ -20,5 +20,5 @@ exports.worker = function(req, res){
 
 exports.manifest = function(req, res){
   res.header('Content-Type', 'application/javascript');
-  res.render('social/manifest.json.ejs', { baseUrl: config.get("public_url"), layout: false });
+  res.render('social/manifest.json.ejs', { baseUrl: config.get("public_url"), providerSuffix: config.get("social_provider")['name_suffix'], layout: false });
 }

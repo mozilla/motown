@@ -3,7 +3,14 @@
   "version": "0.0.1",
   "private": true,
   "dependencies": {
+    "mime": "1.2.x",
     "feedme": "0.2.2",
+
+    "clarinet": "0.5.x",
+    "JSV": "4.0.x",
+    "orderly": "1.0.x",
+    "hashish": ">=0.0.4",
+    "formidable": "1.0.x",
 
     "express": "2.5.x",
 

@@ -111,6 +111,7 @@ http.get('/logout', routes.site.logout);
 
 http.get('/social/worker.js', routes.social.worker);
 http.get('/social/sidebar', routes.social.sidebar);
+http.get('/social/manifest.json', routes.social.manifest);
 
 http.get('/profile', application.authenticate, routes.profile.index.get);
 http.put('/profile', application.authenticate, routes.profile.index.put);

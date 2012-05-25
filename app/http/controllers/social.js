@@ -17,3 +17,8 @@ exports.worker = function(req, res){
   res.header('Content-Type', 'application/javascript');
   res.render('social/worker.js.ejs', { user: req.user, wsUrl: config.get("public_ws_url"), layout: false });
 };
+
+exports.manifest = function(req, res){
+  res.header('Content-Type', 'application/javascript');
+  res.render('social/manifest.json.ejs', { baseUrl: config.get("public_url"), layout: false });
+}

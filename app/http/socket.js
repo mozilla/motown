@@ -53,7 +53,6 @@ function subscribeForStories(){
     pubsubRedis.subscribe("stories");
 
     pubsubRedis.on("message", function(channel, message){
-      logger.debug("Message received in socket.js.");
       if (channel == "stories"){
         var data = JSON.parse(message);
         

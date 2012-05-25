@@ -2,6 +2,47 @@ html, body {
   
 }
 
+html, body.anonymous {
+  background-clip: border-box;
+  background-color: #EEE;
+  background-image: url(http://www.mozilla.org/media/img/sandstone/bg-sky.png);
+  background-origin: padding-box;
+  background-repeat: repeat-x;
+  color: #333;
+  display: block;
+  font-size: 16px;
+  height: 804px;
+  line-height: 24px;
+  margin: 0px;
+  padding-bottom: 48px;
+  padding: 0px;
+}
+
+body.anonymous h1 {
+  color: #333;
+  display: block;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 40px;
+  font-weight: bold;
+  letter-spacing: -1px;
+  padding: 200px 10px;
+  text-align: center;
+  text-rendering: optimizelegibility;
+}
+
+body #ui, body.authenticated #signin {
+  display: none;
+}
+
+body.authenticated #ui {
+  display: block;
+}
+
+body.authenticated #ui {
+  display: block;
+}
+
+
 .fixed-top-bar{
   position: fixed;
   top: 0;

@@ -9,6 +9,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
     <meta name="author" content="">
+    <% if (!user) { %>
+    <meta http-equiv="refresh" content="5">
+    <% } %>
 
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" >
     <link href="/stylesheets/sidebar.css"   rel="stylesheet" type="text/css" media="screen">
@@ -31,7 +34,7 @@
     <script type="text/javascript">
       var storyTemplate = null;
       var contactTemplate = null;
-      var port = navigator.mozSocial.getWorker().port;
+      var port = null;
 
       var handlers = {
         'feed.story': function(data){
@@ -72,20 +75,7 @@
         }
       };
 
-      port.onmessage = function(e) {
-
-        var data = e.data;
-        var handler = handlers[data.topic];
-        
-        if (handler){
-          handler(data.data);
-        }
-        else{
-          dump("Unhandled message: " + e.topic + "\n");
-        }
-      };
-
-      $(function(){
+      function init(){
         dump('Initializing Story UI\n');
         storyTemplate = $('#story_template');
         storyTemplate.removeAttr('id');
@@ -100,49 +90,80 @@
           return false;
         });
 
+        port = navigator.mozSocial.getWorker().port;
         port.postMessage({topic: 'sidebar.registration'});
+
+        port.onmessage = function(e) {
+
+          var data = e.data;
+          var handler = handlers[data.topic];
+          
+          if (handler){
+            handler(data.data);
+          }
+          else{
+            dump("Unhandled message: " + e.topic + "\n");
+          }
+        };
         dump("Sidebar initialized.\n");
+      }
+
+      $(function(){
+        // If user is logged in.
+        if (<%= (user != null) %>){
+          $('body').addClass('authenticated');
+          init();
+        }
+        else{
+          $('body').addClass('anonymous');
+        }
       });
 
     </script>
   </head>
 
   <body>
-    <div id="top_bar" class="fixed-top-bar">
-      <h1>MoTown</h1>
-      <ul><li><a href="/settings">Settings</a></li></ul>
+    <div id="signin">
+      <h1>Welcome to MoTown</h1>
+      <h2><a href="/" target="_NEW">Get Started</a></h2>
     </div>
-    <div class="feed">
-      <ul>
-        <li class="story" id="story_template">
-          <img 
-            class="thumbnail" 
-            alt="placeholder alt" 
-            height="30" 
-            width="30" 
-            src="https://secure.gravatar.com/avatar/ffcab65cd081527c38e6584ae729b276?s=30&d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-140.png" />
-          <p>bronson commented on issue 531 on twitter/bootstrap</p>
-        </li>
-      </ul>
-    </div>
-    <div class="contacts">
-      <h2>Online Contacts</h2>
-      <ul>
-        <li id="contact_template">
-          <img
-            class="thumbnail"
-            alt="Gravatar"
-            height="30"
-            width="30"
-            src="http://www.gravatar.com/avatar/26beabd6213224f03555a80d5ef59d61?s=29" />
-          <a href="https://mozillians.org/en-US/search?q=wex">Simon Wex</a>
-          <span class="status">
-            <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-              <circle cx="15" cy="15" r="5" stroke="black" stroke-width="0" fill="green" />
-            </svg>
-          </span>
-        </li>
-      </ul>
+    <div id="ui">
+      <div id="top_bar" class="fixed-top-bar">
+        <h1>MoTown</h1>
+        <ul><li><a href="/profile">Profile</a></li><li><a href="/feeds">Feeds</a></li><li><a href="/logout">Log out</a></li></ul>
+      </div>
+      <div class="feed">
+        <ul>
+          <li class="story" id="story_template">
+            <img 
+              class="thumbnail" 
+              alt="placeholder alt" 
+              height="30" 
+              width="30" 
+              src="https://secure.gravatar.com/avatar/ffcab65cd081527c38e6584ae729b276?s=30&d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-140.png" />
+            <p>bronson commented on issue 531 on twitter/bootstrap</p>
+          </li>
+        </ul>
+      </div>
+      <div class="contacts">
+        <h2>Online Contacts</h2>
+        <ul>
+          <li id="contact_template">
+            <img
+              class="thumbnail"
+              alt="Gravatar"
+              height="30"
+              width="30"
+              src="http://www.gravatar.com/avatar/26beabd6213224f03555a80d5ef59d61?s=29" />
+            <a href="https://mozillians.org/en-US/search?q=wex">Simon Wex</a>
+            <span class="status">
+              <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+                <circle cx="15" cy="15" r="5" stroke="black" stroke-width="0" fill="green" />
+              </svg>
+            </span>
+          </li>
+        </ul>
+      </div>
     </div>
   </body>
 </html>

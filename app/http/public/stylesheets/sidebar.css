@@ -30,6 +30,10 @@ body.anonymous h1 {
   text-rendering: optimizelegibility;
 }
 
+body.anonymous h2 {
+  text-align: center;
+}
+
 body #ui, body.authenticated #signin {
   display: none;
 }

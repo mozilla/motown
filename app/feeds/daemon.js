@@ -3,104 +3,107 @@
 /* This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
- 
-const
-Url = require('url');
-
-var
-ee = new require('events').EventEmitter(),
-http = require('https'),
-logger = require('winston'),
-parsers = require('./parsers'),
-deduper = new (require('./deduper'))(),
-redis = require('../../lib/redis')();
 
 require('../../lib/extensions/number');
+ 
+var
+maxStoryAge = (12).hours(),
+logger  = require('winston'),
+config  = require('../../lib/configuration'),
+deduper = new (require('./deduper'))(maxStoryAge),
+FeedParser = require('feedparser'),
+mysql   = require('mysql').createClient(config.get('mysql')),
+redis   = require('../../lib/redis')();
 
-var scrapeList;
-var scrapers = {};
+var subscriptions = {}; // {<url>: [<user.id>, ...], ...
+var timers = {};
 
-function Scraper(url, users, parser){
-  this.url = url;
-  this.users = users;
-  this.parserClass = parsers[parser];
-  this.updateFrequency = 2000;
-    
-  this.scrape = function(){
-    logger.debug("Scraping! (" + this.url + ")");
-    var httpOptions = Url.parse(this.url);
-    var users = this.users;
-    var parser = new this.parserClass(function(story){
-      if (deduper.hasntHeardOf(story.id)){
-        logger.debug("deduping: " + story.id);
-        deduper.add(story.id);
-        // LPUSH each story d -> [c,b,a] .. [d,c,b,a]
-        try{
-          redis.lpush("stories", JSON.stringify({users: users, story: story}), function (err, reply) {
-            // logger.debug(["Added story to stories:", err, reply].join("\n\t"));
+function schedule(url, delay){
+  if (!delay)
+    delay = (30).seconds();
+
+  timers[url] = setTimeout(function(){scrape(url)}, delay);
+}
+
+function scrape(url){
+  delete timers[url];
+
+  logger.debug("Scraping: " + url + " for users: " + JSON.stringify(subscriptions[url]));
+
+  var parser = new FeedParser();
+
+  //HACKHACK: Overwriting the parser's error handler
+  parser.handleError = function(e, scope){
+    logger.debug("Got an error parsing feed: " + e);
+    schedule(url);
+  }
+
+  parser.parseUrl(url, function(err, meta, articles){
+    if (err){
+      logger.error("Error parsing URL: " + url + "\n\t" + err);
+    }
+    else{
+      for (var i in articles){
+
+        var story = {
+          id: articles[i].guid,
+          people: articles[i].author,
+          title: articles[i].title,
+          href: articles[i].link,
+          pubdate: articles[i].pubdate,
+          image: articles[i].image
+        };
+
+        
+        if (((new Date() - Date.parse(story.pubdate) < maxStoryAge) && deduper.hasntHeardOf(story.id))) {
+          deduper.add(story.id);
+          redis.lpush("stories", JSON.stringify({'userIds': subscriptions[url], 'story': story}), function (err, reply) {
+            if (err)
+              logger.error(err);
           });
         }
-        catch(e){
-          logger.error(e);
-        }
       }
-    });
-
-    var scraper = this;
-
-    http.get(httpOptions, function(response) {
-      logger.debug("Scrape Response: " + response.statusCode);
-      response.on('data', function (chunk) {
-        parser.feed(chunk);
-      }).on('error', function(e) {
-        logger.error("Error scraping (" + this.url + "): \n" + e.message);
-        scraper.setTimeout();
-      }).on('end', function(e) {
-        logger.debug("Finalizing scrape (" + this.url + ")");
-        scraper.setTimeout();
-      });
-    });
-  };
-
-  this.setTimeout = function(){
-    var that = this;
-    this.timeout = setTimeout(function(){that.scrape()}, (30).seconds());
-  };
-
-  this.die = function(){
-    clearTimeout(this.timeout);
-  };
-
-  this.scrape();  
-}
-
-function updateScrapers(){
-  logger.info('Updating scrapers.');
-  //TODO: Actually get the URLs or pull from sql
-  var tasks = [
-    {
-      url: 'https://github.com/simonwex.private.atom?token=e268ea839eafefd3ce74a4a5b9bd9687',
-      users: ['simon@simonwex.com', 'swex@mozilla.com', 'dascher@mozilla.com'],
-      parser: 'AtomParser'
-    },
-    {
-      url: 'https://blog.mozilla.org/feed/',
-      users: ['simon@simonwex.com', 'swex@mozilla.com', 'dascher@mozilla.com'],
-      parser: 'RssParser'
     }
-  ];
-
-  for (var i in scrapers){
-    scrapers[i].die();
-  }
-
-  scrapers = {};
-
-  for (i in tasks){
-    var task = tasks[i];
-    logger.debug(["Creating new scraper: ", task.url, task.users, task.parser].join("\n\t"));
-    scrapers[task.url] = new Scraper(task.url, task.users, task.parser);
-  }
+    schedule(url);
+  });
 }
 
-updateScrapers();
+function reloadUrls(){
+  for (var url in timers){
+    clearTimeout(timers[url]);
+  }
+  timers = {};
+  subscriptions = {};
+
+  mysql.query(
+    "SELECT url, user_id as userId FROM feeds WHERE verified = 1 ORDER BY url, user_id",
+    function(err, rows){
+
+      if (!err){
+        var url = null;
+        for (var i in rows){
+          if (rows[i].url != url){
+            url = rows[i].url;
+            subscriptions[url] = [rows[i].userId];
+          }
+          else{
+            subscriptions[url].push(rows[i].userId);
+          }
+        }
+        for (var url in subscriptions){
+          scrape(url)
+        }
+        // console.log(JSON.stringify(subscriptions));
+      }
+      else{
+        logger.error("Error initializing RSS Scraper: " + err + "\n\nExiting.");
+        process.exit(1);
+      }
+    }
+  );
+}
+
+var reloadInterval = setInterval(reloadUrls, (10).minutes());
+reloadUrls();
+
+// TODO: listen as a worker.

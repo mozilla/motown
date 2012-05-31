@@ -57,7 +57,7 @@ function scrape(url){
         
         if (((new Date() - Date.parse(story.pubdate) < maxStoryAge) && deduper.hasntHeardOf(story.id))) {
           deduper.add(story.id);
-          redis.lpush("stories", JSON.stringify({'userIds': subscriptions[url], 'story': story}), function (err, reply) {
+          redis.lpush("serializer:stories", JSON.stringify({'userIds': subscriptions[url], 'story': story}), function (err, reply) {
             if (err)
               logger.error(err);
           });

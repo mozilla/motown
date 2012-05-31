@@ -39,7 +39,7 @@ redis.debug_mode = false;
 
 function waitForStory(){
   // This is a blocking call only to the network layer (we keep ticking)
-  redis.brpop('stories', 0, function(err, data){
+  redis.brpop('serializer:stories', 0, function(err, data){
     // data == ['stories', '{story json as string}']
 
     //TODO: Error handling including:
@@ -52,8 +52,8 @@ function waitForStory(){
     var data = data.pop();
     var story = JSON.parse(data);
 
-    // Publish the story as a pub/sub event for any subscribers to pick up (socket)
-    redis.publish('stories', data, function(err){
+    // Publish the raw story data as a pub/sub event for any subscribers to pick up (socket)
+    redis.publish('feeds.data', data, function(err){
       if (err)
         logger.error(err);
     });

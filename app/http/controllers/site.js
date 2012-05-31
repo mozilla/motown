@@ -3,8 +3,10 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const
-config = require('../../../lib/configuration');
+createRedisClient = require('../../../lib/redis'),
 
+logger = require('winston'),
+config = require('../../../lib/configuration');
 
 /*
  * GET home page.
@@ -13,7 +15,6 @@ exports.index = function(req, res){
   res.render('site/index', { user: req.user });
 };
 
-
 // POST /auth/browserid
 //   Use passport.authenticate() as route middleware to authenticate the
 //   request.  BrowserID authentication will verify the assertion obtained from
@@ -21,7 +22,15 @@ exports.index = function(req, res){
 exports.authenticate = function(req, res) {
   res.redirect('/');
 };
-exports.logout = function(req, res){
+
+exports.signout = function(req, res){
+  if (req.user){
+    var redis = createRedisClient();
+    redis.publish('user.signout', req.user.id.toString(), function(err){
+    if (err)
+      logger.error(err);
+    });
+  }
   req.logout();
   res.redirect('/');
 };

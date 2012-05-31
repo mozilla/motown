@@ -25,8 +25,6 @@ connections = {}, // {<userId>: [conn, conn], ...}
 socket = null,
 io = null;
 
-
-
 function sendMessageToUser(userId, message){
   if (userId in connections){
     for (var i in connections[userId]){
@@ -50,31 +48,54 @@ function sendStoryToUser(story, userId){
 
 function subscribeForStories(){
   pubsubRedis.on("ready", function(){
-    pubsubRedis.subscribe("stories");
+    pubsubRedis.subscribe(["feeds.data", "user.signout", 'contacts.update']);
 
     pubsubRedis.on("message", function(channel, message){
-      if (channel == "stories"){
-        var data = JSON.parse(message);
-        
-        var users = data.userIds;
-        for (var i in users){
-          if (users[i] in connections){
-            sendStoryToUser(data.story, users[i]);
+      switch(channel){
+        case "feeds.data":
+          var data = JSON.parse(message);
+
+          var users = data.userIds;
+          for (var i in users){
+            if (users[i] in connections){
+              sendStoryToUser(data.story, users[i]);
+            }
           }
-        }
-      }
-      else{
-        logger.error("Redis message received in socket.js on unexpected channel: " + channel);
+          break;
+        case "user.signout":
+          var userId = parseInt(message);
+
+          logger.debug("User #" + message + " signing out. (" + connections[userId].length + " active connections)");
+
+          if (userId in connections){
+            for (var i in connections[userId]){
+              var connection = connections[userId][i];
+
+              connection.sendUTF(JSON.stringify({topic: 'user.signout'}), function(){
+                connection.close();
+              });
+            }
+            delete connections[userId];
+          }
+          break;
+        case "contacts.update":
+          // TODO: This is a nasty performance issue. We're updating all users' contact lists, this needs to be done selectively
+          for (var userId in connections){
+            sendContactListToUser(userId);
+          }
+
+          break;
+        default:
+          logger.error("Redis message received in socket.js on unexpected channel: " + channel);
       }
     });
   });
 }
 
 function sendContactListToUser(userId){
-
   mysql.query(
     "SELECT DISTINCT \
-      users.real_name, \
+      users.real_name as realName, \
       users.nick, \
       CONCAT('http://www.gravatar.com/avatar/', MD5(users.email)) as gravatar, \
       networks.status \

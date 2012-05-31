@@ -10,7 +10,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <% if (!user) { %>
-    <meta http-equiv="refresh" content="5">
+    <meta http-equiv="refresh" content="1">
     <% } %>
 
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" >
@@ -63,6 +63,7 @@
           }
         },
         'contacts.list': function(data){
+          $('.contacts ul').empty();
           for (var i in data){
             var li = contactTemplate.clone();
             var contact = data[i];
@@ -137,7 +138,7 @@
     <div id="ui">
       <div id="top_bar" class="fixed-top-bar">
         <h1>MoTown</h1>
-        <ul><li><a href="/profile">Profile</a></li><li><a href="/feeds">Feeds</a></li><li><a href="/logout">Log out</a></li></ul>
+        <ul><li><a href="/profile">Profile</a></li><li><a href="/feeds">Feeds</a></li></ul>
       </div>
       <div class="feed">
         <ul>

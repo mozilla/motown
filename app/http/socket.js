@@ -106,10 +106,10 @@ function sendContactListToUser(userId){
       ON \
       networks.user_id = users.id \
     WHERE \
-      networks.channel in (SELECT channel FROM networks as n2 WHERE n2.user_id = ?)",
-      // AND \
-      // networks.user_id <> ?"
-    [userId],
+      networks.channel in (SELECT channel FROM networks as n2 WHERE n2.user_id = ?) \
+      AND \
+      networks.user_id <> ?",
+    [userId, userId],
     function(err, rows){
       if (err)
         logger.error(err);
@@ -118,7 +118,7 @@ function sendContactListToUser(userId){
         var contacts = [];
         for (var i in rows){
           contacts.push({
-            realName: rows[i].real_name,
+            realName: (rows[i].realName || rows[i].nick),
             gravatar: rows[i].gravatar,
             nick: rows[i].nick,
             status: rows[i].status || 'available'  
@@ -132,22 +132,20 @@ function sendContactListToUser(userId){
 }
 
 function userConnected(user){
-  //TODO: Switch to using ids for stories
   mysql.query("SELECT * FROM stories where user_id = ? ORDER BY published_at DESC LIMIT 30", [user.id], function(err, rows){
-    logger.debug(parseInt(rows || rows.length) + ' stories found for user.');
+    logger.debug(parseInt(rows && rows.length) + ' stories found for user.');
 
     for(var i in rows){
       // To make sure we sen the last one first.
       i = rows.length - i - 1;
       var story = JSON.parse(rows[i].data);
-      console.log(rows[i].published_at);
       sendStoryToUser(story, user.id);
     }
   });
   
   var responseQueue = "irc-resp:" + uuid.v1();
   var redis = createRedisClient();
-  redis.lpush("irc:updateUserStatusFromId", JSON.stringify([user.id, responseQueue]));
+  redis.lpush("irc:user-connected", JSON.stringify([user.id, user.nick, responseQueue]));
 
   // We block for two minutes max.
   redis.brpop(responseQueue, 120, function(err, data){
@@ -216,8 +214,8 @@ module.exports = {
             userConnected(user);
 
             connection.on('close', function() {
-              logger.debug(connection.user + " disconnected");
-              var userConnections = connections[connection.user];
+              logger.debug(user.email + " disconnected");
+              var userConnections = connections[user.id];
               var previousCount = userConnections.length
 
               var index = userConnections.indexOf(connection);

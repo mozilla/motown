@@ -120,7 +120,7 @@ routes = {
 
 
 http.get('/',       routes.site.index);
-http.get('/logout', routes.site.logout);
+http.get('/signout', routes.site.signout);
 http.post('/auth/browserid', passport.authenticate('browserid', { failureRedirect: '/login' }), routes.site.authenticate);
 
 

@@ -31,6 +31,9 @@ function log(message, angry){
 }
 
 var handlers = {
+  'user.signout': function(){
+    sidebarPort.postMessage({topic: 'user.signout'});
+  },
   'feed.story': function(story){
     // dump("Sending message to sidebar. (port: " + sidebarPort + ")\n\tStory to send: " + JSON.stringify(story) + "\n\n");
     sidebarPort.postMessage({topic: 'feed.story', data: story});

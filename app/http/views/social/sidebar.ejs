@@ -37,6 +37,9 @@
       var port = null;
 
       var handlers = {
+        'user.signout': function(){
+          window.location.reload();
+        },
         'feed.story': function(data){
           dump(data + "\n\n");
           var li = storyTemplate.clone();

@@ -34,7 +34,7 @@ function scrape(url){
 
   //HACKHACK: Overwriting the parser's error handler
   parser.handleError = function(e, scope){
-    logger.debug("Got an error parsing feed: " + e);
+    logger.debug("Got an error parsing feed in feed daemon: " + e);
     schedule(url);
   }
 

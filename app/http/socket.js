@@ -93,6 +93,7 @@ function subscribeForStories(){
 }
 
 function sendContactListToUser(userId){
+  logger.debug("Sending contact list to user. (id: " + userId + ")");
   mysql.query(
     "SELECT DISTINCT \
       users.real_name as realName, \
@@ -132,7 +133,13 @@ function sendContactListToUser(userId){
 }
 
 function userConnected(user){
+  logger.debug("Loading stories for user. (id: " + user.id + ")");
   mysql.query("SELECT * FROM stories where user_id = ? ORDER BY published_at DESC LIMIT 30", [user.id], function(err, rows){
+    if (err){
+      logger.error("Error loading stories for user: " + user.email);
+      logger.error(err);
+    }
+
     logger.debug(parseInt(rows && rows.length) + ' stories found for user.');
 
     for(var i in rows){

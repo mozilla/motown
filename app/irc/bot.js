@@ -47,7 +47,7 @@ var bot = new irc.Client(ircConfig.server, ircConfig.nick, {
 });
 
 bot.addListener('error', function(error){
-  logger.error(error);
+  console.log(error);
 });
 
 bot.addListener("registered", function(){

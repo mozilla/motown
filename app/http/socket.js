@@ -223,15 +223,17 @@ module.exports = {
             connection.on('close', function() {
               logger.debug(user.email + " disconnected");
               var userConnections = connections[user.id];
-              var previousCount = userConnections.length
+              if (userConnections){
+                var previousCount = userConnections.length
 
-              var index = userConnections.indexOf(connection);
+                var index = userConnections.indexOf(connection);
 
-              if (~index) {
-                // remove the connection from the pool
-                userConnections.splice(index, 1);
-                if (!userConnections.length){
-                  delete connections[connection.user];
+                if (~index) {
+                  // remove the connection from the pool
+                  userConnections.splice(index, 1);
+                  if (!userConnections.length){
+                    delete connections[connection.user];
+                  }
                 }
               }
             });

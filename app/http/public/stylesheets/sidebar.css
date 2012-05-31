@@ -98,10 +98,13 @@ ul li .thumbnail {
   height: 30px;
 }
 
+ul li span.status {
+  float: right;
+}
+
 ul li svg {
   width: 30px;
   height: 30px;
-  float: right;
   display: inline;
 }
 

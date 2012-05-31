@@ -46,7 +46,9 @@
           li.attr('id', data.id);
           dump(data.id + "\n");
           if (data['image']){
-            li.find('img.thumbnail').attr('src', data.image.url).attr('alt', data.image.title);
+            var img = li.find('img.thumbnail');
+            img.attr('src', data.image.url);
+            img.attr('alt', data.image.title);
           }
           else{
             li.find('img.thumbnail').remove();

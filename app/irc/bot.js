@@ -86,9 +86,6 @@ bot.addListener('join', function(channel, who) {
     aliases[nick] = who;
   }
 
-  console.log(nick);
-  console.log(nick in idsByNick);
-
 
   if (nick in idsByNick){
     // User has just joined another channel
@@ -325,6 +322,7 @@ function insertNetworkUpdate(channels, userId, status, botUpdateId, callback){
 }
 
 function updateUserStatus(nick, cb){
+  console.log("Updating user status, active nick: " + activeNick(nick) + ". (nick: " + nick + ")");
   bot.whois(activeNick(nick), function(response){
     if (!response.error){
 
@@ -374,15 +372,20 @@ function beAGoodLittleWorker(){
         var id = args[0];
         var nick = args[1];
         var cb = args[2];
-        updateUserStatus(nick, function(nick, status, channels){
-          if (!~channels.indexOf('#motown')){
-            bot.send('INVITE', activeNick(nick), '#motown');
-          }
+        if (nick){
+          updateUserStatus(nick, function(nick, status, channels){
+            if (!~channels.indexOf('#motown')){
+              bot.send('INVITE', activeNick(nick), '#motown');
+            }
 
-          if (typeof(cb) == 'function'){
-            cb({error: null, 'nick':nick, 'status': status, 'channels': channels});
-          }
-        });
+            if (typeof(cb) == 'function'){
+              cb({error: null, 'nick':nick, 'status': status, 'channels': channels});
+            }
+          });
+        }
+        else{
+          cb({error: "nick  not provided"});
+        }
         break;
     }
     process.nextTick(beAGoodLittleWorker);

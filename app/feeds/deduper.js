@@ -4,7 +4,7 @@
 
 
 var 
-logger = require('winston'),
+logger = require('../../lib/logger'),
 crypto = require('crypto');
 
 

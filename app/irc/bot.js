@@ -9,14 +9,12 @@ Url = require('url');
 
 var
 config      = require('../../lib/configuration'),
-logger      = require('winston'),
+logger      = require('../../lib/logger'),
 irc         = require('irc'),
 uuid        = require('node-uuid'),
 mysql       = require('mysql').createClient(config.get('mysql')),
 redis       = require('../../lib/redis')(),
 workerRedis = require('../../lib/redis')();
-
-logger.handleExceptions(new logger.transports.Console({ colorize: true, json: true }));
 
 require('../../lib/extensions/number');
 
@@ -39,11 +37,11 @@ var channels = {}; // {'#channel': [<user.id>, ...], ...}
  *
  */
 
- logger.info("IRC Bot Starting up.");
+logger.info("IRC Bot Starting up.");
 
 var ircConfig = config.get('irc');
 var bot = new irc.Client(ircConfig.server, ircConfig.nick, {
-  debug: false,
+  debug: true,
   realName: 'Non-archiving MoTown bot',
   channels: ['#motown']
 });

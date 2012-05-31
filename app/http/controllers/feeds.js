@@ -7,7 +7,7 @@ config     = require('../../../lib/configuration'),
 mysql      = require('mysql').createClient(config.get('mysql')),
 Url        = require('url'),
 FeedParser = require('feedparser'),
-logger     = require('winston');
+logger     = require('../../../lib/logger');
 
 
 /* 

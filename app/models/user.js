@@ -9,7 +9,7 @@
 // Module dependencies.
 const 
 config = require('../../lib/configuration'),
-logger = require('winston'),
+logger = require('../../lib/logger'),
 crypto = require('crypto'),
 mysql  = require('mysql').createClient(config.get('mysql'));
 

@@ -9,7 +9,7 @@
 // Module dependencies.
 const 
 redis   = require('../lib/redis')(),
-logger  = require('winston'),
+logger  = require('../lib/logger'),
 config  = require('../lib/configuration'),
 mysql   = require('mysql').createClient(config.get('mysql'));
 

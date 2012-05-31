@@ -5,7 +5,7 @@
 const
 config = require('../../../lib/configuration'),
 uuid = require('node-uuid'),
-logger = require('winston'),
+logger = require('../../../lib/logger'),
 createRedisClient = require('../../../lib/redis');
 
 /* 

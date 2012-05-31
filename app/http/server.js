@@ -9,7 +9,7 @@
 // Module dependencies.
 const 
 express     = require('express'),
-logger      = require('winston'),
+logger      = require('../../lib/logger'),
 passport    = require('passport'),
 util        = require('util'),
 application = require('./controllers/application'),

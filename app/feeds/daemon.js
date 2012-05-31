@@ -8,7 +8,7 @@ require('../../lib/extensions/number');
  
 var
 maxStoryAge = (12).hours(),
-logger  = require('winston'),
+logger  = require('../../lib/logger'),
 config  = require('../../lib/configuration'),
 deduper = new (require('./deduper'))(maxStoryAge),
 FeedParser = require('feedparser'),

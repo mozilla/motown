@@ -5,7 +5,7 @@
 const
 createRedisClient = require('../../../lib/redis'),
 
-logger = require('winston'),
+logger = require('../../../lib/logger'),
 config = require('../../../lib/configuration');
 
 /*

@@ -26,23 +26,18 @@ var channels = {}; // {'#channel': [<user.id>, ...], ...}
  * Here's what we do on startup:
  *  - Connect to IRC server
  *  - Wait for registration
+ *  - /join #motown
  *  - Get all the nicks we care about from our user table
  *  - For each User:
  *    - WHOIS user.nick
  *      - For each channel
- *        - Join chan
  *        - REPLACE INTO networks
  *  - DELETE from networks where bot_instance_id <> <BOT_INSTANCE_ID>
  *    (This makes sure that old cached info is destroyed after a restart)
- *  - If we don't find an online user, we'll never be alerted to a user being online 
- *    (no join messages when you're not in any chans) 
  *
- * One thing this doesn't accomplish yet is filling the aliases list off the bat.
- * We can only get WHO *|* results for users in the same rooms as us, we'll have 
- * to deal with this later.
  */
 
- //TOOD: Figure out a better way to bootstrap. -- Currently, I'm just making sure I join #motown
+ logger.info("IRC Bot Starting up.");
 
 var ircConfig = config.get('irc');
 var bot = new irc.Client(ircConfig.server, ircConfig.nick, {
@@ -52,10 +47,10 @@ var bot = new irc.Client(ircConfig.server, ircConfig.nick, {
 });
 
 bot.addListener('error', function(error){
-  console.log(error);
+  logger.error(error);
 });
 
-function bootstrap(){
+bot.addListener("registered", function(){
   mysql.query(
     "SELECT id, nick FROM users WHERE nick is not null and nick <> ''",
     function(err, rows){
@@ -75,9 +70,7 @@ function bootstrap(){
       }
     }
   );
-}
-
-bot.addListener("registered", bootstrap);
+});
 
 bot.addListener('join', function(channel, who) {
   var parts = parseStatus(who);
@@ -88,17 +81,23 @@ bot.addListener('join', function(channel, who) {
     aliases[nick] = who;
   }
 
+  console.log(nick);
+  console.log(nick in idsByNick);
+
 
   if (nick in idsByNick){
     // User has just joined another channel
-    bot.join(channel);
-    insertNetworkUpdate(channel, idsByNick[nick], status, null);
+    insertNetworkUpdate(channel, idsByNick[nick], status, null, function(){
+      broadcast();
+    });
   }
   else{
     mysql.query("SELECT id FROM users where nick = ?", [nick], function(err, rows){
       if (rows.legnth > 0){
         idsByNick[nick] = rows[0].id;
-        insertNetworkUpdate(channel, rows[0].id, status, null);
+        insertNetworkUpdate(channel, rows[0].id, status, null, function(){
+          broadcast();
+        });
 
         // This is to help with bootstrapping:
         updateUserStatus(nick);
@@ -110,6 +109,51 @@ bot.addListener('join', function(channel, who) {
   console.log('%s has joined %s', who, channel);
 });
 
+
+// This is a hackity hack way of doing this
+// Essentially, we tell the socket to update all 
+// the users that have anything to do with this user.
+// Those connections should really just listen in on
+// events for each channel/network
+function getBroadcastList(userId, callback){
+  mysql.query(
+    "SELECT DISTINCT \
+      users.id as userId \
+    FROM \
+      users \
+    INNER JOIN \
+      networks \
+      ON networks.user_id = users.id \
+    WHERE \
+      networks.channel in \
+      ( \
+        SELECT channel \
+        FROM networks as n2 \
+        WHERE n2.user_id = ? and networks.user_id <> ? \
+      )",
+    [userId, userId],
+    function(err, rows){
+      if (err){
+        logger.error("Error in getBroadcastList: " + err);
+      }
+      else {
+        var ids = [];
+        for (var i in rows){
+          ids.push(rows.userId);
+        }
+        callback(ids);
+      }
+    }
+  );
+}
+
+function broadcast(){
+  redis.publish('contacts.update', null, function(err){
+    if (err)
+        logger.error(err);
+  });
+}
+
 function userLeftChannel(channel, who){
   logger.debug("User " + who + " left " + channel);
   var nick = parseStatus(who)[0];
@@ -120,6 +164,7 @@ function userLeftChannel(channel, who){
       "DELETE FROM networks WHERE user_id = ? and channel = ?",
       [idsByNick[nick], channel],
       function(err, rows){
+        broadcast();
         mysql.query(
           "SELECT COUNT(*) as count FROM users where id = ?",
           [idsByNick[nick]],
@@ -143,11 +188,11 @@ function userLeftChannel(channel, who){
 function userLeft(who){
   var nick = parseStatus(who)[0];
   if (nick in idsByNick){
-  
     mysql.query(
       "DELETE FROM networks WHERE user_id = ?",
       [idsByNick[nick]],
       function(){
+        broadcast();
         delete idsByNick[nick];
         delete aliases[nick];
       }
@@ -198,6 +243,7 @@ bot.addListener('nick', function(oldNick, newNick, channels) {
         function(err, results){
           if (err)
             logger.error(err);
+          broadcast();
         }
       );
     }
@@ -215,9 +261,9 @@ bot.addListener('nick', function(oldNick, newNick, channels) {
           var userId = rows[0].id;
           idsByNick[newNick] = userId;
 
-          for(var i in channels){
-            insertNetworkUpdate(channels[i], userId, newStatus);
-          }          
+          insertNetworkUpdate(channels, userId, newStatus, function(){
+            broadcast();
+          });
         }
       }
     );
@@ -239,32 +285,60 @@ function parseStatus(nick){
   return nick.split("|", 2);
 }
 
-function insertNetworkUpdate(channel, userId, status, botUpdateId){
-  mysql.query(
-    "REPLACE INTO networks (channel, user_id, status, bot_update_id) VALUES (?, ?, ?, ?)",
-    [channel, userId, status, botUpdateId],
-    function(err){
-      if (err)
-        logger.error(err);
-    }
-  );
+function insertNetworkUpdate(channels, userId, status, botUpdateId, callback){
+  if (typeof(channels) == 'string'){
+    channels = [channels];
+  }
+  var placeholders = [];
+  var values = [];
+
+  for (var i in channels){
+    placeholders.push("(?, ?, ?, ?)");
+    values.push(channels[i]);
+    values.push(userId);
+    values.push(status);
+    values.push(botUpdateId);
+  }
+
+  if (channels.length > 0){
+    mysql.query(
+      "REPLACE INTO networks (channel, user_id, status, bot_update_id) VALUES " + placeholders.join(', '),
+      values,
+      function(err){
+        if (err)
+          logger.error(err);
+
+        if (typeof(callback) == 'function'){
+          callback();
+        }
+      }
+    );
+  }
+  else{
+    console.log("User: " + userId + " wasn't in any chans");
+  }
 }
 
-function updateUserStatus(nick){
+function updateUserStatus(nick, cb){
   bot.whois(activeNick(nick), function(response){
-    var status = parseStatus(activeNick(nick))[1];
-    var botUpdateId = uuid.v1();
-    for (var i in response.channels){
-      bot.join(response.channels[i]);
-      insertNetworkUpdate(response.channels[i], idsByNick[nick], status, botUpdateId);
+    if (!response.error){
+
+      var status = parseStatus(activeNick(nick))[1];
+      var botUpdateId = uuid.v1();
+
+      insertNetworkUpdate(response.channels, idsByNick[nick], status, botUpdateId, function(){
+        mysql.query("DELETE FROM networks WHERE user_id = ? AND bot_update_id <> ?", [idsByNick[nick], botUpdateId], function(err){
+          if (typeof(cb) == 'function'){
+            cb(nick, status, response.channels);
+          }
+        });
+      });
     }
-    mysql.query("DELETE FROM networks WHERE user_id = ? AND bot_update_id <> ?", [idsByNick[nick], botUpdateId]);
-    //TODO: Issue Published event.
   });
 }
 
 function beAGoodLittleWorker(){
-  workerRedis.brpop('irc:whois', 'irc:updateUserStatusFromId', 0, function(err, data){
+  workerRedis.brpop('irc:whois', 'irc:user-connected', 0, function(err, data){
 
     var args = JSON.parse(data.pop());
     var cmd = data.pop().split(':')[1];
@@ -291,27 +365,19 @@ function beAGoodLittleWorker(){
         
         break;
 
-      case 'updateUserStatusFromId': //(id, responseQueue)
-        var id = args[0]
-        mysql.query(
-          "SELECT nick FROM users WHERE id = ?",
-          [id],
-          function(err, rows){
-            if (err){
-              logger.error(err);
-            }
-            else if (rows.length > 0){
-              updateUserStatus(rows[0].nick);
-              // Callback
-              args.pop()({error: null, response: 'OK'});
-            }
-            else{
-              // Callback
-              args.pop()({error: "Unable to find User based on id: " + id});
-            }
+      case 'user-connected': //(id, nick, responseQueue/)
+        var id = args[0];
+        var nick = args[1];
+        var cb = args[2];
+        updateUserStatus(nick, function(nick, status, channels){
+          if (!~channels.indexOf('#motown')){
+            bot.send('INVITE', activeNick(nick), '#motown');
           }
-        );
-      
+
+          if (typeof(cb) == 'function'){
+            cb({error: null, 'nick':nick, 'status': status, 'channels': channels});
+          }
+        });
         break;
     }
     process.nextTick(beAGoodLittleWorker);

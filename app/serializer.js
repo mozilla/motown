@@ -52,12 +52,6 @@ function waitForStory(){
     var data = data.pop();
     var story = JSON.parse(data);
 
-    // Publish the raw story data as a pub/sub event for any subscribers to pick up (socket)
-    redis.publish('feeds.data', data, function(err){
-      if (err)
-        logger.error(err);
-    });
-
     var userIds = story.userIds;
     story = story.story;
 
@@ -71,6 +65,14 @@ function waitForStory(){
           // TODO: Handle error wisely 
           if (err)
             logger.error(err);
+
+          // Publish the story data as a pub/sub event for the socket if it's a new record
+          if (data.affectedRows == 1){
+            redis.publish('feeds.storyForUser', JSON.stringify({'userId': userId, 'story': story}), function(err){
+              if (err)
+                logger.error(err);
+            });
+          }
         }
       );
       

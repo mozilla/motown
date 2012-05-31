@@ -37,7 +37,7 @@ function sendMessageToUser(userId, message){
 /*
  * Story Stuff: This should really get rolled up into a model.
  */
-function sendStoryToUser(story, userId){
+function sendStoryToUser(userId, story){
   var message = JSON.stringify({
     topic: 'feed.story',
     data: story
@@ -48,19 +48,15 @@ function sendStoryToUser(story, userId){
 
 function subscribeForStories(){
   pubsubRedis.on("ready", function(){
-    pubsubRedis.subscribe(["feeds.data", "user.signout", 'contacts.update']);
+    pubsubRedis.subscribe(["feeds.storyForUser", "user.signout", 'contacts.update']);
 
     pubsubRedis.on("message", function(channel, message){
       switch(channel){
-        case "feeds.data":
+        case "feeds.storyForUser":
+          console.log(message);
           var data = JSON.parse(message);
+          sendStoryToUser(data.userId, data.story);
 
-          var users = data.userIds;
-          for (var i in users){
-            if (users[i] in connections){
-              sendStoryToUser(data.story, users[i]);
-            }
-          }
           break;
         case "user.signout":
           var userId = parseInt(message);
@@ -146,7 +142,7 @@ function userConnected(user){
       // To make sure we sen the last one first.
       i = rows.length - i - 1;
       var story = JSON.parse(rows[i].data);
-      sendStoryToUser(story, user.id);
+      sendStoryToUser(user.id, story);
     }
   });
   

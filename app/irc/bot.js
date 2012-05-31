@@ -16,6 +16,8 @@ mysql       = require('mysql').createClient(config.get('mysql')),
 redis       = require('../../lib/redis')(),
 workerRedis = require('../../lib/redis')();
 
+logger.handleExceptions(new logger.transports.Console({ colorize: true, json: true }));
+
 require('../../lib/extensions/number');
 
 var idsByNick = {}; // {<user.nick>: <user.id>, ...}
@@ -48,6 +50,11 @@ var bot = new irc.Client(ircConfig.server, ircConfig.nick, {
 
 bot.addListener('error', function(error){
   console.log(error);
+});
+
+bot.addListener('close', function(){
+  console.log("IRC Got close event.");
+  process.exit(1);
 });
 
 bot.addListener("registered", function(){

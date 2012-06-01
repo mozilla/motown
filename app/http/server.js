@@ -94,7 +94,12 @@ http.configure(function(){
     key: 'express.sid',
     store: sessionStore
   }));
-  
+
+  http.use(function (req, res, next) {
+    res.removeHeader("X-Powered-By");
+    next();
+  });
+
   // Initialize Passport! 
   http.use(passport.initialize());
   // Support persistent sessions:

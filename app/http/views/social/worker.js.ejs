@@ -21,6 +21,26 @@ function log(message, angry){
   if (typeof(message.join) == 'function'){
     message = message.join("\n");
   }
+  if (typeof(message) == 'object'){
+    var h = message;
+    message = [];
+    if ('title' in h){
+      message.push(h.title);
+      message.push(":\n");
+      delete h['title'];
+    }
+    else{
+      message.push("[object]:\n");
+    }
+    for (var k in h){
+      message.push("\t");
+      message.push(k);
+      message.push(": ");
+      message.push(h[k]);
+      message.push("\n")
+    }
+    message = message.join('');
+  }
   if (angry)
     dump("\n\n\n");
   
@@ -73,19 +93,20 @@ var handlers = {
     motown.onopen = function(){
       log("Connected to MoTown!", true);
     };
-    motown.onclose = function(){
+    motown.onclose = function(e){
       //TODO: Put sidebar in "disconnected" state and try to reconnect
+      log({title: "WebSocket to MoTown closed", code: e.code, reason: e.reason});
     };
   },
   'social.cookie-changed': function(data){},
 };
-
 
 // Side-bar stuff
 var apiPort = null;
 var sidebarPort = null;
 
 var ports = [];
+
 onconnect = function(e) {
   var port = e.ports[0];
   port.onmessage = function (e) {
@@ -95,8 +116,13 @@ onconnect = function(e) {
     if (handler == null){
       dump("No handler found for " + msg.topic + "\n");
     }
-    else{
-      handler(msg, port);
+    else {
+      try {
+        handler(msg, port);
+      }
+      catch(e){
+        log("Error thrown by handler: " + e.toString(), true);
+      }
     }
   }
   inbound = e.ports[0];

@@ -108,6 +108,10 @@ ul li svg {
   display: inline;
 }
 
+.feed ul li {
+  cursor: pointer;
+}
+
 .feed ul li p {
   margin-left: 45px;
 }

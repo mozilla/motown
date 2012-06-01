@@ -61,9 +61,9 @@ function subscribeForStories(){
         case "user.signout":
           var userId = parseInt(message);
 
-          logger.debug("User #" + message + " signing out. (" + connections[userId].length + " active connections)");
-
           if (userId in connections){
+            logger.debug("User #" + message + " signing out. (" + connections[userId].length + " active connections)");
+
             for (var i in connections[userId]){
               var connection = connections[userId][i];
 

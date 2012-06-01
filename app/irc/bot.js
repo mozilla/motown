@@ -262,8 +262,7 @@ bot.addListener('nick', function(oldNick, newNick, channels) {
           }
           var userId = rows[0].id;
           idsByNick[newNick] = userId;
-
-          insertNetworkUpdate(channels, userId, newStatus, function(){
+          insertNetworkUpdate(channels, userId, newStatus, null, function(){
             broadcast();
           });
         }

@@ -29,6 +29,11 @@ $ > npm install
 $ > NODE_ENV=development ./app.js 
 </pre>
 
+### Some Notes on Development:
+
+* Each component can be run separately, have a look in app.js for a listing.
+* It's polite to change the IRC nick your dev bot uses, see config/development.json (motown-{your real nick} probably makes sense)
+
 ## Configuration
 
 

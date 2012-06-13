@@ -36,10 +36,13 @@
       var contactTemplate = null;
       var port = null;
       var resetContactListOnNextUpdate = true;
+
+      <% if (user){ %>
       var my = {
         'id': <%= user.id%>, 
         'nick': "<%= user.nick.replace('\"', '\\"')%>" //' <- that bit is to keep the syntax highlighter happy
       };
+      <% } %>
 
       var handlers = {
         'user.signout': function(){

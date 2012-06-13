@@ -1,0 +1,23 @@
+{
+  "irc": {
+    "nick": "motown",
+    "server": "localhost",
+    "retryDelay": 200
+  },
+  "logger": {
+    "level": "verbose"
+  },
+  "bind_to": {
+    "port": 3000
+  },
+  "public_url": "http://localhost:3000",
+  "public_ws_url": "ws://localhost:3000",
+  "mysql": {
+    "user": "motown",
+    "password": "motown",
+    "database": "motown_test"
+  },
+  "social_provider": {
+    "name_suffix": "-wex"
+  }
+}

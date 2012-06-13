@@ -93,7 +93,6 @@ function reloadUrls(){
         for (var url in subscriptions){
           scrape(url)
         }
-        // console.log(JSON.stringify(subscriptions));
       }
       else{
         logger.error("Error initializing RSS Scraper: " + err + "\n\nExiting.");

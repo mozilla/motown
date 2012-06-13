@@ -1,0 +1,9 @@
+{ "network":  "motown",
+  "hostname": "localhost",
+  "serverDescription": "A Node IRC daemon",
+  "serverName": "irc.motown.test",
+  "port": 6667,
+  "motd": "Message of the day",
+  "whoWasLimit": 10000,
+  "token": 1
+}

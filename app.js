@@ -9,5 +9,8 @@
 const 
 feedDaemon = require('./app/feeds/daemon.js'),
 serializer = require('./app/serializer.js'),
-ircBot     = require('./app/irc/bot.js'),
+IrcBot     = require('./app/irc/bot.js'),
 httpd      = require('./app/http/server.js');
+
+var bot = new IrcBot();
+bot.connect();

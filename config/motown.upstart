@@ -12,3 +12,4 @@ stop on runlevel 6
 console output
 
 exec /opt/motown/app.js
+respawn

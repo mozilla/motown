@@ -30,6 +30,8 @@ function Bot(){
   this.worker = new Worker(this);
   this.nick = ircConfig.nick;
 
+  logger.info("IRC Bot Ready.\n\tirc:" + ircConfig.server + ":6667/#motown as " + this.nick);
+
   this.client = new irc.Client(ircConfig.server, ircConfig.nick, {
     autoConnect: false,
     debug: false,
@@ -69,14 +71,17 @@ util.inherits(Bot, events.EventEmitter);
 module.exports = Bot;
 
 Bot.prototype.connect = function(callback){
+  logger.verbose("IRC Bot: Connecting...");
+
   var self = this;
   
   this.client.connect(10, function(){
     self.state = "connected";
-    logger.verbose("IRC Bot connected.");
+    logger.verbose("IRC Bot: connected.");
 
     if (typeof(callback) == 'function'){
       self.once('operational', function(){
+        logger.info("IRC Bot: operational");
         callback(null, self.state);
       });
     }
@@ -122,7 +127,6 @@ Bot.prototype.disconnect = function(cb){
 
 // We run if we weren't 'required'
 if (!module.parent){
-  console.log("Starting MoTown IRC Bot.");
   var bot = new Bot();
   bot.connect();
 

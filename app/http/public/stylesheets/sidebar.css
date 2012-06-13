@@ -46,6 +46,10 @@ body.authenticated #ui {
   display: block;
 }
 
+.status{
+  text-transform: uppercase;
+}
+
 
 .fixed-top-bar{
   position: fixed;

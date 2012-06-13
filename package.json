@@ -2,6 +2,12 @@
   "name": "MoTown",
   "version": "0.0.1",
   "private": true,
+  "devDependencies": {
+    "mocha": "1.1.x",
+    "should": "0.6.x",
+    "ircdjs": "git://github.com/simonwex/ircd.js.git",
+    "string": "0.2.x"
+  },
   "dependencies": {
     "mime": "1.2.x",
     "feedme": "0.2.2",

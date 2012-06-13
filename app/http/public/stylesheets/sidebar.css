@@ -50,31 +50,35 @@ body.authenticated #ui {
 .fixed-top-bar{
   position: fixed;
   top: 0;
-  height: 30px;
+  height: 18px;
   background-color: #2c2c2c;
   margin: 0;
-  padding: 0;
+  padding: 4px 0 5px 0;
   width: 100%;
 }
 
 .fixed-top-bar h1{
   display: inline;
-  font-size: 20px;
+  font-size: 14px;
   color: white;
-  margin: 5px;
-  padding: 0;
+  line-height:100%;
+  margin: 0px 0px 5px 5px;
+  padding-right:15px;
 }
+
 .fixed-top-bar ul, .fixed-top-bar ul li, .fixed-top-bar ul li a{
   display: inline;
   border: none;
+  font-size:12px;
+  text-align:right;
 }
 
-
 .feed {
-  margin-top: 30px;
+  margin-top: 27px;
   height: 400px;
   overflow-y: auto;
   overflow-x: hidden;
+
 }
 ul {
   margin: 0;
@@ -113,7 +117,10 @@ ul li svg {
 }
 
 .feed ul li p {
-  margin-left: 45px;
+  margin:0px 0px 9px 45px;
+  font-family: "Lucida Grande","Lucida Sans Unicode",Lucida,Arial,Helvetica,sans-serif;
+  font-size: 11px;
+  line-height: 15px;
 }
 .contacts ul li p {
   margin-right: 45px;
@@ -129,10 +136,15 @@ ul li svg {
 }
 
 .contacts h2 {
-  font-size: 20px;
+  font-size: 14px;
   color: white;
   background-color: #2c2c2c;
   width: 100%;
   margin: 0;
-  padding: 0;
+  padding: 0 0 0 5px;
+  line-height:150%;
+}
+
+.story {
+  font-size:9px;
 }

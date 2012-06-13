@@ -46,8 +46,6 @@ exports.feed = {
     );
 
     function saveFeed(){
-      console.log("Saving feed");
-      console.log(feed);
       mysql.query(
         "REPLACE INTO feeds (url, title, verified, user_id) VALUES (?, ?, ?, ?)",
         [feed.url, feed.title, feed.verified, req.user.id],

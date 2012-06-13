@@ -15,14 +15,14 @@
 
     <link href="/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css" >
     <link href="/stylesheets/sidebar.css"   rel="stylesheet" type="text/css" media="screen">
-    <script src="http://code.jquery.com/jquery-1.7.1.min.js" type="text/javascript"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" type="text/javascript"></script>
     <script src="/bootstrap/js/bootstrap.min.js" type="text/javascript"></script>
     <script src="https://browserid.org/include.js" type="text/javascript"></script>
     <script src="/javascripts/application.js" type="text/javascript"></script>  
 
     <!-- Le HTML5 shim, for IE6-8 support of HTML5 elements -->
     <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+      <script src="https://html5shim.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
     <!-- Le fav and touch icons
@@ -35,16 +35,21 @@
       var storyTemplate = null;
       var contactTemplate = null;
       var port = null;
+      var resetContactListOnNextUpdate = true;
+      var my = {
+        'id': <%= user.id%>, 
+        'nick': "<%= user.nick.replace('\"', '\\"')%>" //' <- that bit is to keep the syntax highlighter happy
+      };
 
       var handlers = {
         'user.signout': function(){
           window.location.reload();
         },
         'feed.story': function(data){
-          dump(data + "\n\n");
+          
           var li = storyTemplate.clone();
           li.attr('id', data.id);
-          dump(data.id + "\n");
+          
           if (data['image']){
             var img = li.find('img.thumbnail');
             img.attr('src', data.image.url);
@@ -64,26 +69,71 @@
             $('.feed ul li:last-child').remove();
           }
         },
-        'contacts.list': function(data){
-          $('.contacts ul').empty();
-          for (var i in data){
-            var li = contactTemplate.clone();
-            var contact = data[i];
-            li.find('a').text(contact.realName).attr('href', 'https://mozillians.org/en-US/search?q=' + contact.nick);
-            li.find('img').attr('src', contact.gravatar + "?s=30");
+        'contacts.reset': function(){
+          resetContactListOnNextUpdate = true;
+        },
+        'contacts.userStatusUpdate': function(contact){
+          // TODO: worry about networks.
 
-            if (contact.status != 'available'){
-              li.find('svg').remove();
-              li.find('.status').text(contact.status);
-            }
-            $('.contacts ul').append(li);
-            li.show();
+          dump("Received contact update: "+ JSON.stringify(contact) + "\n");
 
-            dump("Contact:\n\t" + JSON.stringify(contact) + "\n");
+          // TODO: add my own status in the UI somewhere.
+          if (contact.id == my.id)
+            return;
+          
+          if (resetContactListOnNextUpdate){
+            resetContactListOnNextUpdate = false;
+            $('.contacts ul').empty();
           }
 
+          var li = $('#contact_' + contact.id);
+          
+          if (li.length == 0){
+            li = contactTemplate.clone();
+            li.attr('id', 'contact_' + contact.id);
+            $('.contacts ul').append(li);
+          }
+          
+          li.find('a').text(contact.realName).attr('href', 'https://mozillians.org/en-US/search?q=' + contact.nick);
+          li.find('img').attr('src', contact.gravatar + "?s=30");
+
+          if (contact.status){
+            li.find('svg').hide();
+            var button = li.find('.status button');
+            var btnClasses = statusClasses[contact.status];
+            if (!btnClasses){
+              btnClasses = statusClasses['default'];
+            }
+            
+            button.attr('class', btnClasses);
+            button.text(contact.status);
+            button.show();
+          }
+          else{
+            li.find('svg').show();
+            li.find('.status button').hide(); 
+          }
+
+          li.show();
+        },
+        'contacts.userOffline': function(contact){
+          $('#contact_' + contact.id).remove();
         }
+        
       };
+
+      var statusClasses = {
+        afk:       'btn btn-mini btn-info',
+        away:      'btn btn-mini btn-info',
+        zzz:       'btn btn-mini btn-inverse',
+        offline:   'btn btn-mini btn-inverse',
+        meeting:   'btn btn-mini btn-warning',
+        mtg:       'btn btn-mini btn-warning',
+        dnd:       'btn btn-mini btn-error',
+        busy:      'btn btn-mini btn-error',
+        'default': 'btn btn-mini'
+      }
+
 
       function init(){
         dump('Initializing Story UI\n');
@@ -150,7 +200,7 @@
               alt="placeholder alt" 
               height="30" 
               width="30" 
-              src="https://secure.gravatar.com/avatar/xx?s=30&d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-140.png" />
+              src="https://secure.gravatar.com/avatar/xx?s=30&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-140.png" />
             <p>bronson commented on issue 531 on twitter/bootstrap</p>
           </li>
         </ul>
@@ -170,6 +220,7 @@
               <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
                 <circle cx="15" cy="15" r="5" stroke="black" stroke-width="0" fill="green" />
               </svg>
+              <button class="btn btn-mini" data-toggle="dropdown"></button>
             </span>
           </li>
         </ul>

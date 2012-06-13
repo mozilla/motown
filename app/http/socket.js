@@ -34,6 +34,18 @@ function sendMessageToUser(userId, message){
   }
 }
 
+function broadcast(message){
+  if (typeof(message) != 'string'){
+    message = JSON.stringify(message);
+  }
+  for (var userId in connections){
+    for (var i in connections[userId]){
+      var conn = connections[userId][i];
+      conn.sendUTF(message);
+    }
+  }
+}
+
 /*
  * Story Stuff: This should really get rolled up into a model.
  */
@@ -48,12 +60,11 @@ function sendStoryToUser(userId, story){
 
 function subscribeForStories(){
   pubsubRedis.on("ready", function(){
-    pubsubRedis.subscribe(["feeds.storyForUser", "user.signout", 'contacts.update']);
+    pubsubRedis.subscribe(["feeds.storyForUser", "user.signout", 'contacts.userStatusUpdate', 'contacts.userOffline', 'contacts.reset']);
 
     pubsubRedis.on("message", function(channel, message){
       switch(channel){
         case "feeds.storyForUser":
-          console.log(message);
           var data = JSON.parse(message);
           sendStoryToUser(data.userId, data.story);
 
@@ -74,12 +85,14 @@ function subscribeForStories(){
             delete connections[userId];
           }
           break;
-        case "contacts.update":
-          // TODO: This is a nasty performance issue. We're updating all users' contact lists, this needs to be done selectively
-          for (var userId in connections){
-            sendContactListToUser(userId);
-          }
-
+        case "contacts.reset":
+          broadcast(message);
+          break;
+        case "contacts.userStatusUpdate":
+          broadcast(message);
+          break;
+        case "contacts.userOffline":
+          broadcast(message);
           break;
         default:
           logger.error("Redis message received in socket.js on unexpected channel: " + channel);
@@ -92,6 +105,7 @@ function sendContactListToUser(userId){
   logger.debug("Sending contact list to user. (id: " + userId + ")");
   mysql.query(
     "SELECT DISTINCT \
+      users.id as id, \
       users.real_name as realName, \
       users.nick, \
       CONCAT('http://www.gravatar.com/avatar/', MD5(users.email)) as gravatar, \
@@ -112,17 +126,19 @@ function sendContactListToUser(userId){
         logger.error(err);
 
       if (rows && rows.length){
-        var contacts = [];
+        
         for (var i in rows){
-          contacts.push({
-            realName: (rows[i].realName || rows[i].nick),
-            gravatar: rows[i].gravatar,
-            nick: rows[i].nick,
-            status: rows[i].status || 'available'  
-          });
+          sendMessageToUser(userId, JSON.stringify({
+            topic: 'contacts.userStatusUpdate',
+            data: {
+              id: rows[i].id,
+              realName: (rows[i].realName || rows[i].nick),
+              gravatar: rows[i].gravatar,
+              nick: rows[i].nick,
+              status: rows[i].status
+            }
+          }));
         }
-
-        sendMessageToUser(userId, JSON.stringify({topic: 'contacts.list', data: contacts}));
       }
     }
   );
@@ -169,7 +185,7 @@ module.exports = {
     });
 
     subscribeForStories();
-    
+
     // This is during the socket upgrade request.
     // We reject for a few reasons mostly around auth
     socket.on('request', function(request){
@@ -205,6 +221,16 @@ module.exports = {
             connection.userId = user.id;
             connection.email = user.email;
             connection.sessionID = sessionID;
+
+            connection.on("message", function(message){
+              message = JSON.parse(message.utf8Data)
+              if (message.topic == 'sidebar.refresh'){
+                userConnected(user);
+              }
+              else{
+                logger.error("Unhandled message from worker: " + JSON.stringify(message));
+              }
+            });
 
             if (!connections[user.id]){
               connections[user.id] = [];

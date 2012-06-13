@@ -17,6 +17,9 @@
 // Make sure we have the right WebSocket class.
 WebSocket = WebSocket || MozWebSocket;
 
+var motown;
+var reconnectInterval;
+
 function log(message, angry){
   if (typeof(message.join) == 'function'){
     message = message.join("\n");
@@ -50,17 +53,44 @@ function log(message, angry){
     dump("\n\n\n");
 }
 
+function rawSidebarMessage(message){
+  sidebarPort.postMessage(message);
+}
+
+function initWebSocket(){
+  clearInterval(reconnectInterval)
+  motown = new WebSocket("<%= wsUrl%>");
+
+  motown.onmessage = function(event){
+    var message = JSON.parse(event.data);
+
+    var handler = handlers[message['topic']];
+
+    if (handler == null){
+      log("No handler found for " + message.topic + " from socket.", true);
+    }
+    else{
+      // log(["Message from motown: ", JSON.stringify(message)]);
+      handler(message);
+    }
+  };
+  motown.onopen = function(){
+    log("Connected to MoTown!");
+  };
+  motown.onclose = function(e){
+    //TODO: Put sidebar in "disconnected" state
+    motown = undefined;
+    log({title: "WebSocket to MoTown closed", code: e.code, reason: e.reason});
+    reconnectInterval = setInterval(initWebSocket, 200);
+  };
+}
+
 var handlers = {
-  'user.signout': function(){
-    sidebarPort.postMessage({topic: 'user.signout'});
-  },
-  'feed.story': function(story){
-    // dump("Sending message to sidebar. (port: " + sidebarPort + ")\n\tStory to send: " + JSON.stringify(story) + "\n\n");
-    sidebarPort.postMessage({topic: 'feed.story', data: story});
-  },
-  'contacts.list': function(contactList){
-    sidebarPort.postMessage({topic: 'contacts.list', data: contactList});
-  },
+  'user.signout':               rawSidebarMessage,
+  'feed.story':                 rawSidebarMessage,
+  'contacts.userOffline':       rawSidebarMessage,
+  'contacts.reset':             rawSidebarMessage,
+  'contacts.userStatusUpdate':  rawSidebarMessage,
   'social.port-closing': function(data, port){
     if (apiPort == port){
       apiPort.close();
@@ -75,28 +105,14 @@ var handlers = {
   'sidebar.registration': function(data, port){
     sidebarPort = port;
     dump('sidebar.registration completed, connecting to MoTown\n');
-    var motown = new WebSocket("<%= wsUrl%>");
 
-    motown.onmessage = function(event){
-      var message = JSON.parse(event.data);
 
-      var handler = handlers[message['topic']];
-
-      if (handler == null){
-        dump("No handler found for " + message.topic + " from socket.\n");
-      }
-      else{
-        // log(["Message from motown: ", JSON.stringify(message)]);
-        handler(message.data);
-      }
-    };
-    motown.onopen = function(){
-      log("Connected to MoTown!", true);
-    };
-    motown.onclose = function(e){
-      //TODO: Put sidebar in "disconnected" state and try to reconnect
-      log({title: "WebSocket to MoTown closed", code: e.code, reason: e.reason});
-    };
+    if (typeof(motown) == 'undefined'){
+      initWebSocket();
+    }
+    else {
+      motown.send(JSON.stringify({topic: 'sidebar.refresh'}));
+    }
   },
   'social.cookie-changed': function(data){},
 };

@@ -37,9 +37,9 @@ var channels = {}; // {'#channel': [<user.id>, ...], ...}
  *
  */
 
-logger.info("IRC Bot Starting up.");
 
 var ircConfig = config.get('irc');
+logger.info("IRC Bot Starting up.  Server is " + ircConfig.server);
 var bot = new irc.Client(ircConfig.server, ircConfig.nick, {
   debug: true,
   realName: 'Non-archiving MoTown bot',

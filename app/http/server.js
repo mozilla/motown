@@ -155,4 +155,4 @@ if (http.address() == null){
   logger.error("Error listening to " + JSON.stringify(config.get('bind_to')));
   process.exit(1);
 }
-logger.info(("MoTown HTTP server listening on port %d in %s mode", http.address().port, http.settings.env));
+logger.info("MoTown HTTP server listening on port " + http.address().port + ".");

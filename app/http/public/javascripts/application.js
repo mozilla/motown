@@ -185,6 +185,9 @@ $(function(){
         var newFeed = template.clone();
         newFeed.find('input[name=url]').change(validateAndSaveUrl);
         newFeed.find('.delete').click(deleteUrl);
+        newFeed.find('form').submit(function(){
+          return false;
+        });
         $('ul.feeds').append(newFeed);
         newFeed.show();
       }

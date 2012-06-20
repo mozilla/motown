@@ -40,6 +40,11 @@ function Bot(){
     channels: ['#motown']
   });
 
+  this.client.on('abort', function(){
+    logger.error("Maximum retry count reached when attempting to connect to IRC server. Exiting.");
+    process.exit(1);
+  });
+
   this.nicksByBaseNick = {}; // {'wex': 'wex|afk', ...}
   this.aliases = {}; // {'wex|afk': 'wex'}
   
@@ -75,7 +80,8 @@ Bot.prototype.connect = function(callback){
 
   var self = this;
   
-  this.client.connect(10, function(){
+  // Retry for 180 * 2 secs (5 minutes) and then exit (see "client.on('abort')).
+  this.client.connect(180, function(){
     self.state = "connected";
     logger.verbose("IRC Bot: connected.");
 

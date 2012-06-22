@@ -40,7 +40,6 @@ function getUsers(callback){
   mysql.query('SELECT id, email FROM users ORDER BY id DESC', function(err, result){
     if (err){
       logger.error("Error retrieving users for bugzilla: " + err);
-      process.exit();
     }
     for (var i in result){
 

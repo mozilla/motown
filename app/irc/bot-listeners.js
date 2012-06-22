@@ -76,7 +76,7 @@ module.exports = function(bot){
       }
 
     });
-    redis.publish('contacts.reset', JSON.stringify({topic: 'contacts.botReset'}), function(err){
+    redis.publish('contacts.reset', JSON.stringify({topic: 'contacts.reset'}), function(err){
       botDB.clearNetworks(function(){
         self.bot.client.send('NAMES', '#motown');
       });

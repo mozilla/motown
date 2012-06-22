@@ -13,12 +13,19 @@
  *    b) We send those to the sidebar.
  */
 
+var SPRITES = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAcCAYAAAAjmez3AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAA2ZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wTU09Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9tbS8iIHhtbG5zOnN0UmVmPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvc1R5cGUvUmVzb3VyY2VSZWYjIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDowMTgwMTE3NDA3MjA2ODExQUQxREY2RTIyRjc1MDAzOCIgeG1wTU06RG9jdW1lbnRJRD0ieG1wLmRpZDo4NDU0RTMyOEI0MUUxMUUxQjNEOUEzRTQwQkFDQ0YxMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo4NDU0RTMyN0I0MUUxMUUxQjNEOUEzRTQwQkFDQ0YxMSIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgQ1M1IE1hY2ludG9zaCI+IDx4bXBNTTpEZXJpdmVkRnJvbSBzdFJlZjppbnN0YW5jZUlEPSJ4bXAuaWlkOjAzODAxMTc0MDcyMDY4MTFBRDFERjZFMjJGNzUwMDM4IiBzdFJlZjpkb2N1bWVudElEPSJ4bXAuZGlkOjAxODAxMTc0MDcyMDY4MTFBRDFERjZFMjJGNzUwMDM4Ii8+IDwvcmRmOkRlc2NyaXB0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';
 
 // Make sure we have the right WebSocket class.
 WebSocket = WebSocket || MozWebSocket;
 
+
+var baseUrl = '<%= baseUrl%>';
+
 var motown;
 var reconnectInterval;
+var notificationCount = {
+  bugzilla: 0
+}
 
 function log(message, angry){
   if (typeof(message.join) == 'function'){
@@ -85,12 +92,34 @@ function initWebSocket(){
   };
 }
 
+function setAmbientNotificationCount(){
+  apiPort.postMessage({
+    topic: 'social.ambient-notification-update',
+    data: {
+      name: 'bugzilla',
+      background: "url(" + SPRITES + ") transparent no-repeat 0px 7px",
+      counter: notificationCount.bugzilla,
+      contentPanel: baseUrl + '/social/bugs'
+    }
+  });
+}
+
 var handlers = {
   'user.signout':               rawSidebarMessage,
   'feed.story':                 rawSidebarMessage,
   'contacts.userOffline':       rawSidebarMessage,
   'contacts.reset':             rawSidebarMessage,
   'contacts.userStatusUpdate':  rawSidebarMessage,
+  'notifications.bugzilla.read': function(message){
+    notificationCount.bugzilla--;
+
+    log(notificationCount.bugzilla, true);
+    setAmbientNotificationCount();
+  },
+  'notifications.bugzilla': function(message){
+    notificationCount.bugzilla++;
+    setAmbientNotificationCount();    
+  },
   'social.port-closing': function(data, port){
     if (apiPort == port){
       apiPort.close();
@@ -100,7 +129,8 @@ var handlers = {
   'social.initialize': function(data, port){
     dump('social.initialize on port ' + JSON.stringify(port) + '\n');
     apiPort = port;
-    //TODO: Swap to websockets
+
+    setAmbientNotificationCount();
   },
   'sidebar.registration': function(data, port){
     sidebarPort = port;

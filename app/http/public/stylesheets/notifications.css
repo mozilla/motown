@@ -1,0 +1,24 @@
+.notifications {
+  height: 400px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+ul li {
+  padding: 5px;
+  border: solid #ccc;
+  border-width: 0 0 1px 0;
+  clear: both;
+  min-height: 1em;
+  overflow-x: hidden;
+}
+ul.notifications li:nth-child(odd) {
+  background-color: #eee;
+}
+.new {
+  font-weight: 800;
+}

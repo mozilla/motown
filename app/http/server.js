@@ -132,6 +132,8 @@ http.post('/auth/browserid', passport.authenticate('browserid', { failureRedirec
 
 http.get('/social/worker.js',     routes.social.worker);
 http.get('/social/sidebar',       routes.social.sidebar);
+http.get('/social/bugs',          routes.social.bugs);
+http.post('/social/bug',          routes.social.markBugAsViewed);
 http.get('/social/manifest.json', routes.social.manifest);
 
 http.get('/profile', application.authenticate, routes.profile.index.get);

@@ -51,10 +51,10 @@ function Bot(){
   // Contextualize this for annonymous callbacks
   var self = this;
   
-  this.client.addListener('error', this.listeners.error);
+  this.client.addListener('error',      this.listeners.error);
 
   this.client.addListener('close',      this.listeners.connectionClosed);
-  this.client.once('registered', this.listeners.botRegistered);
+  this.client.once('registered',        this.listeners.botRegistered);
 
   this.client.addListener('join',       this.listeners.userJoinedMotownChannel);
 

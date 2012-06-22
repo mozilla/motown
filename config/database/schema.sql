@@ -3,7 +3,9 @@ CREATE TABLE stories (
   id           VARCHAR(255)  NOT NULL,
   data         TEXT          NOT NULL,
   user_id      INT           NOT NULL,
-  published_at DATETIME     NOT NULL,
+  published_at DATETIME      NOT NULL,
+  seen_at      DATETIME      NULL,
+  durable      BOOLEAN                 DEFAULT 0,
   created_at   TIMESTAMP     NOT NULL  DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (id, user_id),

@@ -27,8 +27,8 @@ exports.signout = function(req, res){
   if (req.user){
     var redis = createRedisClient();
     redis.publish('user.signout', req.user.id.toString(), function(err){
-    if (err)
-      logger.error(err);
+      if (err)
+        logger.error(err);
     });
   }
   req.logout();

@@ -76,8 +76,9 @@ passport.use(new BrowserID({
 var http = express.createServer();
 
 var sessionStore = new RedisStore({
-      maxAge: (1).day
-    });
+  maxAge: (30).days
+});
+
 // Express Configuration
 http.configure(function(){
   http.set('views', __dirname + '/views');

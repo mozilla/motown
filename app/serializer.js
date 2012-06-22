@@ -60,7 +60,7 @@ function waitForStory(){
 
       // Persist the story to MySQL
       mysql.query(
-        'REPLACE INTO stories SET id = ?, data = ?, user_id = ?, published_at = ?', [story.id, JSON.stringify(story), userId, story.pubdate],
+        'REPLACE INTO stories SET id = ?, data = ?, user_id = ?, published_at = ?, durable = ?', [story.id, JSON.stringify(story), userId, story.pubdate, story.durable],
         function(err, data){
           // TODO: Handle error wisely 
           if (err)

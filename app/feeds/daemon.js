@@ -5,9 +5,10 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 require('../../lib/extensions/number');
- 
+require('./bugzilla');
+
 var
-maxStoryAge = (12).hours(),
+maxStoryAge = (1).hours(),
 logger  = require('../../lib/logger'),
 config  = require('../../lib/configuration'),
 deduper = new (require('./deduper'))(maxStoryAge),

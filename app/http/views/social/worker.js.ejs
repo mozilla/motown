@@ -97,21 +97,6 @@ function initWebSocket(){
 }
 
 function setAmbientNotificationCount(){
-
-  dump(JSON.stringify({
-    topic: 'social.ambient-notification-update',
-    data: {
-      name: 'bugzilla',
-      userName: user.email,
-      displayName: user.realName,
-      portrait: user.portrait,
-      profileURL: baseUrl + '/profile',
-      background: "url(" + SPRITES + ") transparent no-repeat 0px 7px",
-      counter: notificationCount.bugzilla,
-      contentPanel: baseUrl + '/social/bugs'
-    }
-  }));
-
   apiPort.postMessage({
     topic: 'social.ambient-notification-update',
     data: {

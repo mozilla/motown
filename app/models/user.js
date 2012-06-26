@@ -21,6 +21,7 @@ function User(attrs){
   this.email = (attrs['email'] || '').trim();
   this.realName = (attrs['realName'] || '').trim();
   this.nick = (attrs['nick'] || '').trim();
+  this.gravatarHash = crypto.createHash('md5').update(this.email).digest("hex");
 }
 
 module.exports = User;

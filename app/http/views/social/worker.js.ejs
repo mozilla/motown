@@ -101,10 +101,6 @@ function setAmbientNotificationCount(){
     topic: 'social.ambient-notification-update',
     data: {
       name: 'bugzilla',
-      userName: user.email,
-      displayName: user.realName,
-      portrait: user.portrait,
-      profileURL: baseUrl + '/profile',
       background: "url(" + SPRITES + ") transparent no-repeat 0px 7px",
       counter: notificationCount.bugzilla,
       contentPanel: baseUrl + '/social/bugs'
@@ -137,6 +133,16 @@ var handlers = {
   'social.initialize': function(data, port){
     dump('social.initialize on port ' + JSON.stringify(port) + '\n');
     apiPort = port;
+
+    apiPort.postMessage({
+      topic: 'social.ambient-notification-area',
+      data: {
+        userName: user.email,
+        displayName: user.realName,
+        portrait: user.portrait,
+        profileURL: baseUrl + '/profile'
+      }
+    });
 
     setAmbientNotificationCount();
   },

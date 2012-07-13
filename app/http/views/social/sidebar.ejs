@@ -45,6 +45,9 @@
       <% } %>
 
       var handlers = {
+        'sidebar.user-info': function(user){
+          $('#me img').attr('src', user.portrait);
+        },
         'user.signout': function(){
           window.location.reload();
         },
@@ -78,7 +81,7 @@
         'contacts.userStatusUpdate': function(contact){
           // TODO: worry about networks.
 
-          dump("Received contact update: "+ JSON.stringify(contact) + "\n");
+          dump("Received contact update: " + contact.realName + " (" + contact.status + ")\n");
 
           // TODO: add my own status in the UI somewhere.
           if (contact.id == my.id)
@@ -195,7 +198,6 @@
     <div id="ui">
       <div id="top_bar" class="fixed-top-bar">
         <h1>MoTown</h1>
-        <ul><li><a href="/profile">Profile</a></li><li><a href="/feeds">Feeds</a></li></ul>
       </div>
       <div class="feed">
         <ul>
@@ -205,13 +207,21 @@
               alt="placeholder alt" 
               height="30" 
               width="30" 
-              src="https://secure.gravatar.com/avatar/xx?s=30&amp;d=https://a248.e.akamai.net/assets.github.com%2Fimages%2Fgravatars%2Fgravatar-140.png" />
+              src="https://secure.gravatar.com/avatar/xx?s=30" />
             <p>bronson commented on issue 531 on twitter/bootstrap</p>
           </li>
         </ul>
       </div>
       <div class="contacts">
-        <h2>Online Contacts</h2>
+        <div class="header"> 
+          <h2>Contacts</h2>
+          <span>
+            <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
+              <circle cx="15" cy="15" r="5" stroke="black" stroke-width="0" fill="green" />
+            </svg>
+            <button class="btn btn-mini" data-toggle="dropdown" style="display:none;"></button>
+          </span>
+        </h2>
         <ul>
           <li id="contact_template">
             <img
@@ -219,11 +229,11 @@
               alt="Gravatar"
               height="30"
               width="30"
-              src="http://www.gravatar.com/avatar/xx?s=29" />
+              src="http://www.gravatar.com/avatar/xx?s=30" />
             <a href="https://mozillians.org/en-US/search?q=wex">Simon Wex</a>
             <span class="status">
               <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-                <circle cx="15" cy="15" r="5" stroke="black" stroke-width="0" fill="green" />
+                <circle cx="15" cy="15" r="5" stroke-width="0" fill="green" />
               </svg>
               <button class="btn btn-mini" data-toggle="dropdown"></button>
             </span>

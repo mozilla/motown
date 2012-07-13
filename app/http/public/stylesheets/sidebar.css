@@ -66,8 +66,8 @@ body.authenticated #ui {
   font-size: 14px;
   color: white;
   line-height:100%;
-  margin: 0px 0px 5px 5px;
-  padding-right:15px;
+  margin: 0 0 5px 5px;
+  padding-right: 15px;
 }
 
 .fixed-top-bar ul, .fixed-top-bar ul li, .fixed-top-bar ul li a{
@@ -106,15 +106,16 @@ ul li .thumbnail {
   height: 30px;
 }
 
-ul li span.status {
-  float: right;
+.contacts span.status {
+  display: inline;
 }
 
-ul li svg {
+span svg {
   width: 30px;
   height: 30px;
   display: inline;
 }
+
 
 .feed ul li {
   cursor: pointer;
@@ -139,14 +140,30 @@ ul li svg {
   font-size: 1em;
 }
 
-.contacts h2 {
+.contacts .header {
+  background-color: #2c2c2c;
+  margin: 0;
+  padding: 4px 0 5px 0;
+  width: 100%;
+  color: white;
+}
+
+.contacts .header * {
+  display: inline;
+  /*border: 1px solid orange;*/
+}
+
+.contacts .header h2 {
   font-size: 14px;
   color: white;
-  background-color: #2c2c2c;
-  width: 100%;
-  margin: 0;
-  padding: 0 0 0 5px;
-  line-height:150%;
+  line-height:100%;
+  margin: 0 0 5px 5px;
+  padding-right: 15px;
+}
+
+.contacts .header svg {
+  width: 30px;
+  height: 20px;
 }
 
 .story {

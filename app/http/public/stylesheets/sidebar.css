@@ -2,7 +2,7 @@ html, body {
   
 }
 
-html, body.anonymous {
+body.anonymous {
   background-clip: border-box;
   background-color: #EEE;
   background-image: url(http://www.mozilla.org/media/img/sandstone/bg-sky.png);
@@ -64,10 +64,12 @@ body.authenticated #ui {
 .fixed-top-bar h1{
   display: inline;
   font-size: 14px;
-  color: white;
   line-height:100%;
   margin: 0 0 5px 5px;
   padding-right: 15px;
+}
+.fixed-top-bar h1 a{
+  color: white;
 }
 
 .fixed-top-bar ul, .fixed-top-bar ul li, .fixed-top-bar ul li a{
@@ -106,10 +108,6 @@ ul li .thumbnail {
   height: 30px;
 }
 
-.contacts span.status {
-  display: inline;
-}
-
 span svg {
   width: 30px;
   height: 30px;
@@ -127,17 +125,10 @@ span svg {
   font-size: 11px;
   line-height: 15px;
 }
-.contacts ul li p {
-  margin-right: 45px;
-}
 
 .contacts {
   overflow-y: auto;
   overflow-x: hidden;
-}
-
-.contacts li {
-  font-size: 1em;
 }
 
 .contacts .header {
@@ -145,12 +136,18 @@ span svg {
   margin: 0;
   padding: 4px 0 5px 0;
   width: 100%;
+  height: 1.5em;
   color: white;
+  clear: both;
 }
 
-.contacts .header * {
-  display: inline;
-  /*border: 1px solid orange;*/
+.contacts .header h2 {
+  float: left;
+}
+
+.contacts .header .status {
+  margin-right: 0.5em;
+  float: right;
 }
 
 .contacts .header h2 {
@@ -164,6 +161,26 @@ span svg {
 .contacts .header svg {
   width: 30px;
   height: 20px;
+}
+
+.contact {
+  clear: both;
+}
+.contact * {
+  height: 2em;
+}
+.contact .status {
+  float: right;
+  margin-top: 0.5em;
+}
+.contact .name {
+  float: left;
+  margin: 1em;
+  margin-top: 0.75em;
+
+}
+.contact .avatar {
+  float: left;
 }
 
 .story {

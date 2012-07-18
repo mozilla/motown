@@ -7,6 +7,11 @@ body {
   padding-bottom: 40px;
 }
 
+#changes_saved {
+  position: fixed;
+  top: 4em;
+}
+
 body.profile #container{
   padding-top: 10px;
 }
@@ -34,6 +39,11 @@ body.profile #networks li {
 body.profile #networks li:last-child {
   border-bottom: none;
 }
+
+body.profile li.search-choice span {
+  padding-right: 12px;
+}
+
 body.feeds ul.feeds input[type=text]{
   width: 630px;
 }

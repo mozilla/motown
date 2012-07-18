@@ -82,17 +82,20 @@
           // TODO: worry about networks.
 
           dump("Received contact update: " + contact.realName + " (" + contact.status + ")\n");
-
-          // TODO: add my own status in the UI somewhere.
-          if (contact.id == my.id)
-            return;
           
           if (resetContactListOnNextUpdate){
             resetContactListOnNextUpdate = false;
             $('.contacts ul').empty();
           }
 
-          var li = $('#contact_' + contact.id);
+          var li;
+
+          if (contact.id == my.id){
+            li = $('.contacts .header');
+          }
+          else{
+            li = $('#contact_' + contact.id);
+          }
           
           if (li.length == 0){
             li = contactTemplate.clone();
@@ -102,6 +105,10 @@
           
           li.find('a').text(contact.realName).attr('href', 'https://mozillians.org/en-US/search?q=' + contact.nick);
           li.find('img').attr('src', contact.gravatar + "?s=30");
+
+          if (!contact.status){
+            contact.status = "online";
+          }
 
           if (contact.status){
             li.find('svg').hide();
@@ -139,12 +146,12 @@
         otp:       'btn btn-mini btn-warning',
         dnd:       'btn btn-mini btn-error',
         busy:      'btn btn-mini btn-error',
+        online:    'btn btn-mini btn-success',
         'default': 'btn btn-mini'
       }
 
 
       function init(){
-        dump('Initializing Story UI\n');
         storyTemplate = $('#story_template');
         storyTemplate.removeAttr('id');
         $('.feed ul').empty();
@@ -193,11 +200,11 @@
   <body>
     <div id="signin">
       <h1>Welcome to MoTown</h1>
-      <h2><a href="/" target="_NEW">Get Started</a></h2>
+      <h2><a href="/" target="MOTOWN">Get Started</a></h2>
     </div>
     <div id="ui">
       <div id="top_bar" class="fixed-top-bar">
-        <h1>MoTown</h1>
+        <h1><a href="/" target="MOTOWN">MoTown</a></h1>
       </div>
       <div class="feed">
         <ul>
@@ -215,27 +222,27 @@
       <div class="contacts">
         <div class="header"> 
           <h2>Contacts</h2>
-          <span>
+          <span id="my_status" class="status">
             <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-              <circle cx="15" cy="15" r="5" stroke="black" stroke-width="0" fill="green" />
+              <circle cx="15" cy="15" r="5" stroke-width="0" fill="green" />
             </svg>
             <button class="btn btn-mini" data-toggle="dropdown" style="display:none;"></button>
           </span>
-        </h2>
+        </div>
         <ul>
-          <li id="contact_template">
+          <li class="contact" id="contact_template">
             <img
-              class="thumbnail"
+              class="thumbnail avatar"
               alt="Gravatar"
               height="30"
               width="30"
               src="http://www.gravatar.com/avatar/xx?s=30" />
-            <a href="https://mozillians.org/en-US/search?q=wex">Simon Wex</a>
+            <a class="name" target="contacts" href="https://mozillians.org/en-US/search?q=wex">Simon Wex</a>
             <span class="status">
               <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
                 <circle cx="15" cy="15" r="5" stroke-width="0" fill="green" />
               </svg>
-              <button class="btn btn-mini" data-toggle="dropdown"></button>
+              <button class="btn btn-mini"></button>
             </span>
           </li>
         </ul>

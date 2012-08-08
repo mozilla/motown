@@ -17,6 +17,34 @@ module.exports = {
     });
   },
 
+  updateChannelList: function(channels){
+    if (channels.length > 0){
+      mysql.query("DELETE FROM irc_channels", function(){
+
+        var placeholders = [];
+        var values = [];
+
+        for(var i in channels){
+          placeholders.push("(?,?,?)");
+
+          values.push(channels[i].name);
+          values.push(channels[i].users);
+          values.push(channels[i].topic);
+        }
+
+        mysql.query(
+          "INSERT IGNORE INTO irc_channels (name, users, topic) VALUES " +
+          placeholders.join(","),
+          values,
+          function(err, result){
+            if (err)
+              logger.error("Error inserting irc_channels: " + err);
+          }
+        );
+      });
+    }
+  },
+
   insertNetworkUpdate: function(networks, nick, status, botUpdateId, callback){
     if (typeof(networks) == 'string'){
       networks = [networks];

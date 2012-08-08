@@ -3,10 +3,10 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const
-config            = require('../../../lib/configuration'),
-mysql             = require('mysql').createClient(config.get('mysql')),
-createRedisClient = require('../../../lib/redis'),
-logger            = require('../../../lib/logger');
+config = require('../../../lib/configuration'),
+mysql  = require('mysql').createClient(config.get('mysql')),
+redis  = require('../../../lib/redis').pub,
+logger = require('../../../lib/logger');
 
 /*
  * GET home page.

@@ -14,10 +14,12 @@ config  = require('../../lib/configuration'),
 deduper = new (require('./deduper'))(maxStoryAge),
 FeedParser = require('feedparser'),
 mysql   = require('mysql').createClient(config.get('mysql')),
-redis   = require('../../lib/redis')();
+redis   = require('../../lib/redis').io;
 
 var subscriptions = {}; // {<url>: [<user.id>, ...], ...
 var timers = {};
+
+
 
 function schedule(url, delay){
   if (!delay)
@@ -45,7 +47,6 @@ function scrape(url){
     }
     else{
       for (var i in articles){
-
         var story = {
           id: articles[i].guid,
           people: articles[i].author,
@@ -54,7 +55,6 @@ function scrape(url){
           pubdate: articles[i].pubdate,
           image: articles[i].image
         };
-
         
         if (((new Date() - Date.parse(story.pubdate) < maxStoryAge) && deduper.hasntHeardOf(story.id))) {
           deduper.add(story.id);
@@ -96,12 +96,13 @@ function reloadUrls(){
         }
       }
       else{
-        logger.error("Error initializing RSS Scraper: " + err + "\n\nExiting.");
+        logger.error("Error loading URLs to scrape in Feed Daemon: " + err + "\n\nExiting.");
         process.exit(1);
       }
     }
   );
 }
+
 
 var reloadInterval = setInterval(reloadUrls, (10).minutes());
 reloadUrls();

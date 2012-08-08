@@ -7,12 +7,12 @@ config      = require('../../lib/configuration'),
 mysql       = require('mysql').createClient(config.get('mysql')),
 BotUtils    = require('./bot-utils'),
 Redis       = require('../../lib/redis'),
+redis       = Redis.io,
 logger      = require('../../lib/logger');
 
 function Worker(bot){
   this.bot = bot;
-  this.workerRedis = new Redis();
-  this.redis = new Redis();
+  this.workerRedis = Redis.new();
   var self = this;
   this.bot.once('operational', function(){self.beAGoodLittleWorker()});
 }
@@ -32,7 +32,7 @@ Worker.prototype.beAGoodLittleWorker = function(){
     var responseQueue = args.pop();
 
     args.push(function(resp){
-      self.redis.lpush(responseQueue, JSON.stringify(resp));
+      redis.lpush(responseQueue, JSON.stringify(resp));
     });
 
     switch(cmd){

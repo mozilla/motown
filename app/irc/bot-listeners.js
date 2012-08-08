@@ -3,12 +3,12 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 var
-config      = require('../../lib/configuration'),
-uuid        = require('node-uuid'),
-redis       = require('../../lib/redis')(),
-BotUtils    = require('./bot-utils'),
-botDB       = require('./bot-mysql'),
-logger      = require('../../lib/logger');
+config    = require('../../lib/configuration'),
+uuid      = require('node-uuid')
+redis     = require('../../lib/redis').pub,
+BotUtils  = require('./bot-utils'),
+botDB     = require('./bot-mysql'),
+logger    = require('../../lib/logger');
 
 module.exports = function(bot){
   var self = this;
@@ -83,8 +83,20 @@ module.exports = function(bot){
     });
   };
 
+  this.channelListReturned = function(channels){
+    botDB.updateChannelList(channels);
+  };
+
   this.botRegistered = function(){
     bot.state = "registered";
+
+    bot.client.list();
+
+    setInterval(
+      function(){
+        bot.client.list();
+      }, (1).minute
+    );
 
     // We're registered, now we wait until the bot has joined #motown
     bot.client.once('join', self.botJoinedMotown);

@@ -11,7 +11,7 @@ logger  = require('../../lib/logger'),
 config  = require('../../lib/configuration'),
 https   = require('https'),
 mysql   = require('mysql').createClient(config.get('mysql')),
-redis   = require('../../lib/redis')();
+redis   = require('../../lib/redis').io;
 
 var users = [];
 
@@ -37,7 +37,7 @@ function getHttpOptions(email){
 
 function getUsers(callback){
   logger.verbose('Retrieving users for bugzilla polling...');
-  mysql.query('SELECT id, email FROM users ORDER BY id DESC', function(err, result){
+  mysql.query('SELECT id, email FROM users ORDER BY id', function(err, result){
     if (err){
       logger.error("Error retrieving users for bugzilla: " + err);
     }
@@ -45,6 +45,7 @@ function getUsers(callback){
 
       users.push({id: result[i].id, email: result[i].email});
     }
+    
     if (typeof(callback) == 'function'){
       callback();
     }
@@ -77,8 +78,6 @@ function createStory(user, bug){
   var people = []
   if (bug.creator)
     people = [bug.creator.real_name];
-
-  console.log(bug);
 
   var story = {
     id: 'bugzilla:' + bug.id + ":" + bug.last_change_time,

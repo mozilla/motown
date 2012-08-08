@@ -50,24 +50,15 @@ function broadcast(message){
  * Story Stuff: This should really get rolled up into a model.
  */
 function sendStoryToUser(userId, story){
-  var message = {
-      data: story
-    };
-
-  if (story.durable){
-    // We're only doing bugzilla right now
-    message['topic'] = 'notifications.bugzilla';
-  }
-  else {
-    message['topic'] = 'feed.story';
-  }
-
-  sendMessageToUser(userId, JSON.stringify(message));
+  sendMessageToUser(userId, JSON.stringify({
+    topic: 'feed.story',
+    data: story
+  }));
 }
 
 function subscribeForStories(){
   pubsubRedis.on("ready", function(){
-    pubsubRedis.subscribe(["feeds.storyForUser", "notifications.bugzilla.read", "user.signout", 'contacts.userStatusUpdate', 'contacts.userOffline', 'contacts.reset']);
+    pubsubRedis.subscribe(["feeds.storyForUser", "notifications.mention.read", "notifications.mention.new", "user.signout", 'contacts.userStatusUpdate', 'contacts.userOffline', 'contacts.reset']);
 
     pubsubRedis.on("message", function(channel, message){
       switch(channel){
@@ -75,6 +66,14 @@ function subscribeForStories(){
           var data = JSON.parse(message);
           sendStoryToUser(data.userId, data.story);
 
+          break;
+        case "notifications.mention.read":
+          var userId = parseInt(message);
+          sendMessageToUser(userId, '{"topic":"notifications.mention.read"}');
+          break;
+        case "notifications.mention.new":
+          var userId = parseInt(message);
+          sendMessageToUser(userId, '{"topic":"notifications.mention.new"}');
           break;
         case "user.signout":
           var userId = parseInt(message);
@@ -100,9 +99,6 @@ function subscribeForStories(){
           break;
         case "contacts.userOffline":
           broadcast(message);
-          break;
-        case "notifications.bugzilla.read":
-          broadcast({topic: 'notifications.bugzilla.read', data: {id: message}});
           break;
         default:
           logger.error("Redis message received in socket.js on unexpected channel: " + channel);
@@ -138,6 +134,7 @@ function sendContactListToUser(userId){
       if (rows && rows.length){
         
         for (var i in rows){
+          logger.debug('User: ' + rows[i].nick);
           sendMessageToUser(userId, JSON.stringify({
             topic: 'contacts.userStatusUpdate',
             data: {
@@ -154,8 +151,8 @@ function sendContactListToUser(userId){
   );
 }
 
-function sendRecentStories(user, durable){
-  mysql.query("SELECT * FROM stories WHERE user_id = ? AND durable = ? AND seen_at IS NULL ORDER BY published_at DESC LIMIT 30", [user.id, durable], function(err, rows){
+function sendRecentStories(user){
+  mysql.query("SELECT * FROM stories WHERE user_id = ? AND durable = ? AND seen_at IS NULL ORDER BY published_at DESC LIMIT 30", [user.id, false], function(err, rows){
     if (err){
       logger.error("Error loading stories for user: " + user.email);
       logger.error(err);
@@ -172,18 +169,37 @@ function sendRecentStories(user, durable){
   });
 }
 
+function sendNotificationCounts(user){
+  mysql.query(
+    "SELECT COUNT(*) as count FROM stories WHERE user_id = ? and durable = ? AND seen_at IS NULL",
+    [user.id, true],
+    function(err, rows){
+      if (err){
+        logger.error("Error counting notifications for user: " + user.email);
+        logger.error(err);
+      }
+
+      sendMessageToUser(user.id, JSON.stringify({
+        topic: 'notifications.count',
+        mentions: rows[0].count
+      }));
+    }
+  );
+}
+
 function userConnected(user){
   logger.debug("Loading stories for user. (id: " + user.id + ")");
 
-  sendRecentStories(user, true);
-  sendRecentStories(user, false);
+  sendRecentStories(user);
+  sendNotificationCounts(user);
   
   var responseQueue = "irc-resp:" + uuid.v1();
   var redis = createRedisClient();
   redis.lpush("irc:user-connected", JSON.stringify([user.id, user.nick, responseQueue]));
 
-  // We block for two minutes max.
-  redis.brpop(responseQueue, 120, function(err, data){
+  // We block for twenty seconds max.
+  redis.brpop(responseQueue, 20, function(err, data){
+    redis.quit();
     if (!data)
       logger.error("Timeout exceeded waiting for IRC daemon to update user: " + user.id);
 
@@ -207,7 +223,7 @@ module.exports = {
     socket.on('request', function(request){
       if (!request.httpRequest.headers.cookie){
         logger.info('Socket request rejected because it lacked cookie data.');
-        return request.reject();
+        return request.reject(401);
       }
 
       // here we use parseCookie instead of the already parsed cookies because
@@ -217,17 +233,17 @@ module.exports = {
 
       if (!cookies['express.sid']){
         logger.info('Socket request rejected because it lacked an express.sid (Session)');
-        return request.reject();
+        return request.reject(401);
       }
       var sessionID = cookies['express.sid'];
       store.load(sessionID, function(err, session){
         if (err || !session){
           logger.error('Socket request rejected due to error loading session: ' + err);
-          return request.reject();
+          return request.reject(500);
         }
         else if ( !session.passport || !session.passport.user){
           logger.info('Socket request rejected. -- Passport user empty.');
-          return request.reject();
+          return request.reject(401);
         }
         else{
           var connection = request.accept();

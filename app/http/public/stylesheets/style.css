@@ -44,33 +44,49 @@ body.profile li.search-choice span {
   padding-right: 12px;
 }
 
-body.feeds ul.feeds input[type=text]{
+body.profile ul.feeds input[type=text]{
   width: 630px;
 }
-body.feeds div.feeds {
+body.profile div.feeds {
   display: inline;
   margin-left: 25px;
 }
-body.feeds ul.feeds {
-  width: 805px;
+
+body.profile ul {
   list-style-type: none;
+}
+
+body.profile ul.mentionTokens li{
+  margin-bottom: 1em;
+}
+
+body.profile ul.feeds {
+  width: 805px;
   margin-bottom: 35px;
 }
 
-body.feeds ul.feeds form{
+body.profile .feedcontainer ul form{
   padding-left: 59px;
 }
-body.feeds ul.feeds form.verified, body.feeds ul.feeds form.error {
+body.profile .feedcontainer ul form.verified, body.profile .feedcontainer ul form.error {
   padding-left: 19px;
 }
-body.feeds ul.feeds .btn-success, body.feeds ul.feeds .btn-error {
+body.profile .feedcontainer ul .btn-success, body.profile .feedcontainer ul .btn-error {
   display: none;
 }
-body.feeds ul.feeds .verified .btn-success, body.feeds ul.feeds .error .btn-danger {
+body.profile .feedcontainer ul .verified .btn-success, body.profile .feedcontainer ul .error .btn-danger {
   display: inline;
 }
 
-body.feeds .feedcontainer {
+body.profile .mentionTokens .errorMessage{
+  display: none;
+}
+
+body.profile .mentionTokens .error .errorMessage{
+  display: block;
+}
+
+body.profile .feedcontainer {
   min-height: 200px;
   padding-bottom: 100px;
   background-repeat: no-repeat;
@@ -78,6 +94,6 @@ body.feeds .feedcontainer {
   background-image: url('/images/rss-bot-montage.jpg');
 }
 
-body.feeds form.well {
+body.profile form.well {
   background-color: rgba(245, 245, 245, 0.8);
 }

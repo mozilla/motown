@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 require('../../lib/extensions/number');
-require('./bugzilla');
+// require('./bugzilla');
 
 var
 maxStoryAge = (1).hours(),

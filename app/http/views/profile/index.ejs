@@ -1,61 +1,170 @@
-<h1>Your Profile <span id="changes_saved" class="label label-success" style="display:none"></span></h1>
+<div class="page-header">
+  <h1>Your Profile</h1>
+</div>
 
-<div id="container" class="row">
-  <div id="photo" class="span3">
-    <div class="thumbnail">
-      <img src="<%= user.getGravatarUrl(170) %>" width="170" height="170" />
-      <div class="caption">
-        <p>
-          Image loaded from <a href="http://gravatar/">Gravatar</a>
-          <p><a href="http://en.gravatar.com/emails/" target="_NEW" class="btn btn-primary">Manage</a>
-        </p>
+<div id="changes_saved" class="span10 alert alert-success" style="display:none">
+  <b>Profile Saved</b> at <span class="timestamp"></span>
+</div>
+
+<form id="user_form" class="form-horizontal">
+  <fieldset>
+    <section id="chat span10">
+      <div class="page-header">
+        <h1>
+          Networking
+          <small>Chat and availability</small>
+        </h1>
       </div>
-    </div>
-  </div>
-  <div id="details" class="span8" style="background-color: white">
-    <p>
-      MoTown uses IRC to update your availability and status. Currently we're 
-      only supporting this on <a href="irc://irc.mozilla.org">irc.mozilla.org</a>.
-    </p>
-    <form id="user_form" class="form-horizontal">
-        <fieldset>
-          <div class="control-group">
-            <label class="control-label" for="user_nick">IRC Nick</label>
-            <div class="controls">
-              <input class="input-xlarge focused" id="user_nick" name="user[nick]" type="text" value="<%= user.nick %>" placeholder="Nick">
-              <p class="help-block">We only support irc://irc.mozilla.org</p>
-            </div>
-          </div>
-          <div class="control-group">
-            <label class="control-label" for="source_from_irc">Use IRC for Public Details:</label>
-            <div class="controls">
-              <label class="checkbox">
-                <input type="checkbox" id="source_from_irc" value="checked">
-              </label>
-            </div>
-          </div>
+      <p>
+        MoTown uses IRC to update your availability and chat to other Mozillians. Currently we're 
+        only supporting this on <a href="irc://irc.mozilla.org">irc.mozilla.org</a>.
+      </p>
 
+      <div class="control-group">
+        <label class="control-label" for="user_nick">IRC Nickname</label>
+        <div class="controls">
+          <input class="input-xlarge focused" id="user_nick" name="user[nick]" type="text" value="<%= user.nick %>" placeholder="Nick">
+          <p class="help-block">We only support irc://irc.mozilla.org</p>
+        </div>
+      </div>
+      <!-- <div class="control-group">
+        <label class="control-label" for="irc_user">Automatically Connect to IRC For me:</label>
+        <div class="controls">
+          <label class="checkbox">
+            <input type="checkbox" id="irc_user" checked="checked" value="checked">
+          </label>
+          <p class="help-block"></p>
+        </div>
+      </div>
+
+      <div id="networks" class="control-group">
+        <label class="control-label">Auto Join Networks</label>
+        <div class="controls">
+          <select id="autojoin_channels" data-placeholder="Auto Join Networks" multiple="multiple" class="chzn-select">
+            <% for (var i in channels) { %>
+              <option value="<%= channels[i].name %>"><%= channels[i].displayName %></option>
+            <% } %>
+          </select>
+        </div>
+      </div>
+         -->
+    </section>
+  </fieldset>
+
+  <fieldset>
+    <section id="personal">
+      <div class="page-header">
+        <h1>
+          Personal Info
+          <small>your name, photo and the like</small>
+        </h1>
+      </div>
+      <div class="row">
+        <div id="photo" class="span2">
+          <div class="thumbnail">
+            <img src="<%= user.getGravatarUrl(160) %>" width="160" height="160" />
+            <div class="caption">
+              <p>
+                Image loaded from <a href="http://gravatar.com">Gravatar</a>
+                <p><a href="http://en.gravatar.com/emails/" target="_NEW" class="btn btn-primary">Manage</a>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="span9">
           <div class="control-group">
             <label class="control-label" for="name">Real Name</label>
             <div class="controls">
               <input class="input-xlarge" id="user_real_name" name="user[realName]" type="text" value="<%= user.realName %>" placeholder="Real Name">
-              <p id="error_contacting_nickserv" style="display:none" class="help-block alert-error">
-                Error contacting NickServ. Please set your Real Name manually.
-              </p>
             </div>
           </div>
-          
-          <div id="networks" class="control-group" style="display: none;">
-            <label class="control-label">Networks</label>
-            <div class="controls">
-              <ul>
-                <li>#vancouver</li>
-                <li>#b2g</li>
-              </ul>
-              <span class="help-inline">These are maintained by IRC</span>
-            </div>
-          </div>
-        </fieldset>
-      </form>
+        </div>
+      </div>
+    </section>
+  </fieldset>
+</form>
+
+<section id="feeds">
+  <div class="page-header">
+    <h1>
+      Feeds
+      <small>RSS</small>
+    </h1>
+    <p>
+      MoTown uses RSS feeds to keep you updated. We've filled in a couple of examples for you:
+    </p>
+
   </div>
-</div>
+
+  <div class="feedcontainer listcontainer">
+    <ul class="feeds">
+      <% for (var i in feeds){
+        var feed = feeds[i];
+        %>
+        <li>
+          <form class="well form-inline <%= feed.verified ? 'verified' : 'error' %>">
+            <a class="btn btn-success" href="#"><i class="icon-ok-sign icon-white"></i></a>
+            <a class="btn btn-danger btn-error" href="#"><i class="icon-remove-sign icon-white"></i></a>
+            <input type="text" name="url" class="input-xxlarge" placeholder="URL" title="<%= feed.title %>" value="<%= feed.url%>">
+            <input type="hidden" name="previousUrl" value="<%= feed.url%>">
+            <a class="btn btn-danger delete" href="#"><i class="icon-trash icon-white"></i> Delete</a>
+          </form>    
+        </li>
+      <% } %>
+      <li id="feed_template" style="display:none">
+        <form class="well form-inline">
+          <a class="btn btn-success btn-error" href="#"><i class="icon-ok-sign icon-white"></i></a>
+          <a class="btn btn-danger btn-error" href="#"><i class="icon-remove-sign icon-white"></i></a>
+          <input type="text" name="url"  class="input-xxlarge" placeholder="URL">
+          <input type="hidden" name="previousUrl">
+          <a class="btn btn-danger delete" href="#"><i class="icon-trash icon-white"></i> Delete</a>
+        </form>    
+      </li>
+    </ul>
+    <div class="well feeds">
+      <a href="#" id="new_feed_form" class="btn btn-primary"><i class="icon-forward icon-white"></i>New</a>
+    </div>
+  </div>
+
+</section>
+
+<section id="mentions">
+  <div class="page-header">
+    <h1>
+      Mentions
+      <small>When the net screams your name</small>
+    </h1>
+    <p>
+      MoTown checks each story and flags those with mentions of you in the UI.
+    </p>
+
+  </div>
+
+  <div class="listcontainer">
+    <form class="well form-inline <%= feed.verified ? 'verified' : 'error' %>">
+      <ul class="mentionTokens">
+        <% for (var i in watchedTokens){
+          var token = watchedTokens[i];
+          %>
+          <li class="control-group">
+            <div class="input-prepend">
+              <span class="add-on">@</span><input class="input-large" type="text" value="<%= token%>">
+            </div>
+            
+            <a class="btn btn-danger delete" href="#"><i class="icon-trash icon-white"></i> Delete</a>
+          </li>
+        <% } %>
+        <li class="control-group" id="mention_token_template" style="display:none">
+          <div class="input-prepend">
+            <span class="add-on">@</span><input class="input-large" size="16" type="text">
+          </div>
+
+          <a class="btn btn-danger delete" href="#"><i class="icon-trash icon-white"></i> Delete</a>
+          <p class="errorMessage help-block">Mentions may only contain alphanumeric characters, dashes and underscores and must begin with an alphanumeric character.</p>
+        </li>
+      </ul>
+      <a href="#" id="new_token_input" class="btn btn-primary"><i class="icon-forward icon-white"></i>New</a>
+    </form>
+    
+  </div>
+</section>

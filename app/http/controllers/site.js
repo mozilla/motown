@@ -3,9 +3,10 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 const
-createRedisClient = require('../../../lib/redis'),
-
+redis  = require('../../../lib/redis'),
+uuid   = require('node-uuid'),
 logger = require('../../../lib/logger'),
+crypto = require('crypto'),
 config = require('../../../lib/configuration');
 
 /*
@@ -25,8 +26,7 @@ exports.authenticate = function(req, res) {
 
 exports.signout = function(req, res){
   if (req.user){
-    var redis = createRedisClient();
-    redis.publish('user.signout', req.user.id.toString(), function(err){
+    redis.pub.publish('user.signout', req.user.id.toString(), function(err){
       if (err)
         logger.error(err);
     });
@@ -34,3 +34,28 @@ exports.signout = function(req, res){
   req.logout();
   res.redirect('/');
 };
+
+
+exports.driver = function(req, res){
+  var storyId = null;
+
+  if ('story' in req.body){
+    storyId = req.user.email + ":" + uuid.v1()
+    var hash = crypto.createHash('md5').update(req.user.email).digest("hex");
+
+    var story = {
+      id: storyId,
+      people: req.user.email,
+      title: req.body.story.title,
+      href: req.body.story.url,
+      pubdate: new Date(),
+      image: {url: "http://www.gravatar.com/avatar/" + hash + "?s=30"}
+    };
+
+    redis.io.lpush("serializer:stories", JSON.stringify({'userIds': [req.user.id], 'story': story}), function (err, reply) {
+      if (err)
+        logger.error(err);
+    });
+  }
+  res.render('site/driver', {user: req.user, lastId: storyId});
+}

@@ -25,23 +25,22 @@ exports.manifest = function(req, res){
   res.render('social/manifest.json.ejs', { baseUrl: config.get("public_url"), providerSuffix: config.get("social_provider")['name_suffix'], layout: false });
 };
 
-exports.bugs = function(req, res){
-  mysql.query('SELECT * FROM stories WHERE user_id = ? AND durable = ? ORDER BY seen_at, published_at', [req.user.id, true], function(err, rows){
+exports.mentions = function(req, res){
+  mysql.query('SELECT * FROM stories WHERE user_id = ? AND durable = ? ORDER BY seen_at, published_at limit 200', [req.user.id, true], function(err, rows){
     if (err){
       logger.error('Erorr getting stories');
     }
-    var bugs = [];
+    var mentions = [];
     for (var i in rows){
       var story = JSON.parse(rows[i].data);
       story.seen_at = rows[i].seen_at;
-      bugs.push(story);
+      mentions.push(story);
     }
-    res.render('social/bugs', {user: req.user, bugs: bugs, layout: false});
+    res.render('social/mentions', {user: req.user, mentions: mentions, layout: false});
   });
 };
 
-exports.markBugAsViewed = function(req, res){
-  console.log(req.body);
+exports.markMentionAsViewed = function(req, res){
   if (req.user){
     mysql.query(
       "UPDATE stories SET seen_at = NOW() WHERE user_id = ? and id = ?",
@@ -50,8 +49,7 @@ exports.markBugAsViewed = function(req, res){
         if (err){
           logger.error('Error marking story as read: ' + err);
         }
-        var redis = createRedisClient();
-        redis.publish('notifications.bugzilla.read', req.body.id, function(err){
+        redis.publish('notifications.mention.read', req.user.id, function(err){
           if (err)
             logger.error(err);
         });

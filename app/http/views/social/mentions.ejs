@@ -22,21 +22,21 @@
     <![endif]-->
     <script type="text/javascript">
       $(function(){
-        $('.bug a').click(function(e){
+        $('.mention a').click(function(e){
           var li = $(this).parent();
-          var id = li.attr('id').substr(4);
-          
+          var id = li.attr('id').substr(8);
+
           var self = $(this);
           $.ajax({
             type: 'POST',
-            url: '/social/bug',
+            url: '/social/mention',
             data: {'id': id},
             success: function(data){
               self.removeClass('new');
             },
             error: function(){
               //TODO: Do something intelligent in the UI.
-              console.log("Error marking bug as read.");
+              console.log("Error marking mention as read.");
             }
           });
 
@@ -49,11 +49,12 @@
 
   <body>
     <div id="notif">
+      <h1>Mentions:</h1>
       <ul class="notifications">
-        <% for (var i in bugs){ %>
-        <% var readClass = bugs[i].seen_at ? '' : 'new' %>
-        <li id="bug_<%= bugs[i].id%>" class="bug">
-          <a target="_blank" href="<%= bugs[i].href %>" class="<%= readClass%>"><%= bugs[i].title%></a>
+        <% for (var i in mentions){ %>
+        <% var readClass = mentions[i].seen_at ? '' : 'new' %>
+        <li id="mention_<%= mentions[i].id%>" class="mention">
+          <a target="_blank" href="<%= mentions[i].href %>" class="<%= readClass%>"><%= mentions[i].title%></a>
         </li>
         <% } %>
       </ul>

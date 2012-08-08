@@ -14,7 +14,35 @@ Redis  = require('../../../lib/redis');
  */
 exports.index = {
   get: function(req, res){
-    res.render('profile/index', { user: req.user });
+    mysql.query(
+      "SELECT name FROM irc_channels", 
+      function(err, rows){
+        if (err){
+          logger.error("Error retrieving IRC Channels in profile.js: " + err);
+        }
+
+        for(var i in rows){
+          rows[i].displayName = rows[i].name.substr(1);
+        }
+
+        mysql.query(
+          "SELECT title, url, verified FROM feeds WHERE user_id = ?",
+          [req.user.id],
+          function(err, feedRows){
+            mysql.query(
+              "SELECT token FROM watched_tokens WHERE user_id = ?",
+              [req.user.id],
+              function(err, tokens){
+                for(var i in tokens){
+                  tokens[i] = tokens[i].token;
+                }
+                res.render('profile/index', { user: req.user, channels:  rows, feeds: feedRows, watchedTokens: tokens});
+              }
+            );
+          }
+        );
+      }
+    );
   },
   put: function(req, res){
     // Only allow the saving of nick and realName
@@ -31,6 +59,47 @@ exports.index = {
     });
   }
 };
+
+exports.watchedTokens = {
+  put: function(req, res){
+    console.log(req.body);
+    var tokens = req.body.tokens;
+    var values = [];
+    var placeholders = [];
+    for (var i in tokens){
+      //Validate
+      if (tokens[i].match(/^\w[\w\-\_]+$/)){
+        values.push(req.user.id)
+        values.push(tokens[i]);
+        placeholders.push('(?, ?)');
+      }
+      else {
+        res.send('"ERROR"', {status: 500});
+        return;
+      }
+    }
+
+    mysql.query(
+      "DELETE FROM watched_tokens WHERE user_id = ?",
+      [req.user.id],
+      function(err, result){
+        if (err)
+          logger.error("Error deleting old tokens");
+
+        mysql.query(
+          "INSERT INTO watched_tokens (user_id, token) VALUES " + placeholders.join(','),
+          values,
+          function(err, result){
+            if (err)
+              logger.error("Error inserting new tokens: " + err);
+
+            res.send('"OK"');
+          }
+        );
+      }
+    );
+  }
+}
 
 /*
  * POST 

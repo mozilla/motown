@@ -1,3 +1,6 @@
+h1 {
+  font-size: 2em;
+}
 .notifications {
   height: 400px;
   overflow-y: auto;

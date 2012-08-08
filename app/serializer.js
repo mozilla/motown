@@ -8,13 +8,64 @@
 
 // Module dependencies.
 const 
-redis   = require('../lib/redis')(),
-logger  = require('../lib/logger'),
-config  = require('../lib/configuration'),
-mysql   = require('mysql').createClient(config.get('mysql'));
+redis    = require('../lib/redis').new(),
+pubRedis = require('../lib/redis').pub,
+logger   = require('../lib/logger'),
+config   = require('../lib/configuration'),
+mysql    = require('mysql').createClient(config.get('mysql'));
+
+require('../lib/extensions/array');
+require('../lib/extensions/number');
+
+var watchedTokens = null; // {token: [<user.id>, ...], ...
 
 
-redis.debug_mode = false;
+function loadWatchedTokens(callback){
+  mysql.query(
+    "SELECT token, user_id FROM watched_tokens ORDER BY token, user_id",
+    function(err, rows)
+    {
+      if (!err){
+        watchedTokens = {};
+        for (var i in rows){
+
+          var token = "@" + rows[i].token;
+          var userId = rows[i].user_id;
+
+          if (token in watchedTokens){
+            watchedTokens[token].push(userId);
+          }
+          else{
+            watchedTokens[token] = [userId];
+          }
+        }
+        if (typeof(callback) == 'function'){
+          callback();
+        }
+      }
+      else{
+        logger.error("Error loading watched_tokens in Feed Daemon: " + err);
+      }
+    }
+  );
+}
+
+// This method might not look super clear,
+// but it is checking each token found in a story against the
+// complete set of watched tokens. aka {token: [<user.id>, ...], ...}
+// so we return a possibly non-unique list of interested users.
+function checkForMentions(story){
+  var mentionedUsers = [];
+
+  var mentions = story.title.match(/\@\w+/g);
+
+  for (var i in mentions){
+    mentionedUsers = mentionedUsers.concat(watchedTokens[mentions[i]]);
+  }
+
+  return mentionedUsers;
+}
+
 
 // {
 //     "userIds": [ 13, 14 ],
@@ -36,11 +87,13 @@ redis.debug_mode = false;
 //     }
 // }
 
-
 function waitForStory(){
+  logger.debug('Waiting on serializer:stories');
   // This is a blocking call only to the network layer (we keep ticking)
   redis.brpop('serializer:stories', 0, function(err, data){
-    // data == ['stories', '{story json as string}']
+
+    if (err)
+      logger.error("Error dequeueing story: " + err);
 
     //TODO: Error handling including:
     //      - accepting an error from redis
@@ -53,14 +106,26 @@ function waitForStory(){
     var story = JSON.parse(data);
 
     var userIds = story.userIds;
+
     story = story.story;
+
+    var mentionedUsers = [];
+
+    if (!story.durable){
+      mentionedUsers = checkForMentions(story);
+    }
+
+    userIds = Array.uniqueSort(userIds.concat(mentionedUsers));
 
     for (var i in userIds){
       var userId = userIds[i];
 
+      var durable = !!(story.durable || mentionedUsers.indexOf(userId) >= 0);
+      logger.debug("Durable? : " + durable);
+
       // Persist the story to MySQL
       mysql.query(
-        'REPLACE INTO stories SET id = ?, data = ?, user_id = ?, published_at = ?, durable = ?', [story.id, JSON.stringify(story), userId, story.pubdate, !!story.durable],
+        'REPLACE INTO stories SET id = ?, data = ?, user_id = ?, published_at = ?, durable = ?', [story.id, JSON.stringify(story), userId, story.pubdate, !!durable],
         function(err, data){
           // TODO: Handle error wisely 
           if (err)
@@ -68,14 +133,21 @@ function waitForStory(){
 
           // Publish the story data as a pub/sub event for the socket if it's a new record
           if (data.affectedRows == 1){
-            redis.publish('feeds.storyForUser', JSON.stringify({'userId': userId, 'story': story}), function(err){
-              if (err)
-                logger.error(err);
-            });
+            if (durable){
+              pubRedis.publish('notifications.mention.new', userId.toString(), function(err){
+                if (err)
+                  logger.error("Error publishing notifications.mention.new: " + err);
+              });
+            }
+            else {
+              pubRedis.publish('feeds.storyForUser', JSON.stringify({'userId': userId, 'story': story}), function(err){
+                if (err)
+                  logger.error(err);
+              });
+            }
           }
         }
       );
-      
     }
 
     // Rinse and repeat
@@ -83,7 +155,13 @@ function waitForStory(){
   });
 }
 
+
+var reloadInterval = setInterval(loadWatchedTokens, (10).minutes());
+
+
 redis.on("ready", function(){
-  logger.info("Serializer ready.");
-  waitForStory();
+  loadWatchedTokens(function(){
+    logger.info("Serializer ready.");
+    waitForStory();
+  });
 });

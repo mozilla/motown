@@ -74,7 +74,10 @@ passport.use(new BrowserID({
 
 var http = express.createServer();
 
+var redisConfig = config.get('redis');
 var sessionStore = new RedisStore({
+  host: redisConfig.host,
+  port: redisConfig.port,
   maxAge: (30).days
 });
 
@@ -124,22 +127,23 @@ routes = {
   feeds:    require('./controllers/feeds')
 };
 
-
-http.get('/',       routes.site.index);
+http.get('/',        routes.site.index);
 http.get('/signout', routes.site.signout);
 http.post('/auth/browserid', passport.authenticate('browserid', { failureRedirect: '/login' }), routes.site.authenticate);
 
+http.get( '/driver',  application.authenticate, routes.site.driver);
+http.post('/driver',  application.authenticate, routes.site.driver);
 
 http.get('/social/worker.js',     routes.social.worker);
 http.get('/social/sidebar',       routes.social.sidebar);
-http.get('/social/bugs',          routes.social.bugs);
-http.post('/social/bug',          routes.social.markBugAsViewed);
+http.get('/social/mentions',      routes.social.mentions);
+http.post('/social/mention',      routes.social.markMentionAsViewed);
 http.get('/social/manifest.json', routes.social.manifest);
 
 http.get('/profile', application.authenticate, routes.profile.index.get);
 http.put('/profile', application.authenticate, routes.profile.index.put);
 http.post('/profile/nick',  application.authenticate, routes.profile.nick.post);
-
+http.put('/profile/watchedTokens', application.authenticate, routes.profile.watchedTokens.put);
 
 http.get('/feeds',          application.authenticate, routes.feeds.index.get);
 http.post('/feeds/feed',    application.authenticate, routes.feeds.feed.post);

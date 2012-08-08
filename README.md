@@ -34,6 +34,11 @@ $ > NODE_ENV=development ./app.js
 * Each component can be run separately, have a look in app.js for a listing.
 * It's polite to change the IRC nick your dev bot uses, see config/development.json (motown-{your real nick} probably makes sense)
 
+## Troubleshooting
+
+Sometimes the webserver when in dev mode will be unresponsive from the first request. It seems to be a problem with the passport
+library and stale sessions.
+
 ## Configuration
 
 
@@ -124,4 +129,4 @@ social sidebar as well as the socket server.
 
 ## TODOS:
 
-Now see issues: https://github.com/simonwex/motown/issues
+Now see issues: https://github.com/mozilla/motown/issues

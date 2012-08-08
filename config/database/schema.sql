@@ -31,6 +31,8 @@ CREATE TABLE feeds (
   title       VARCHAR(255)  NULL,
   verified    BOOLEAN               DEFAULT 0,
   type        VARCHAR(255)  NULL,
+  -- durable     BOOLEAN               DEFAULT 0,
+  -- interval    INT UNSIGNED          DEFAULT 30,
   created_at  TIMESTAMP     DEFAULT CURRENT_TIMESTAMP,
 
   PRIMARY KEY (url, user_id),
@@ -52,4 +54,24 @@ CREATE TABLE users (
 
   PRIMARY KEY (id),
   KEY index_userss_on_created_at (created_at)
+) ENGINE=InnoDB;
+
+
+DROP TABLE IF EXISTS irc_channels;
+CREATE TABLE irc_channels (
+  name  VARCHAR(255)  NOT NULL,
+  users INT                      DEFAULT 0,
+  topic VARCHAR(255)  NULL,
+
+  PRIMARY KEY (name)
+) ENGINE=MyISAM;
+
+
+DROP TABLE IF EXISTS watched_tokens;
+CREATE TABLE watched_tokens (
+  user_id      INT           NOT NULL,
+  token        VARCHAR(255)  NOT NULL,
+  created_at   TIMESTAMP     NOT NULL  DEFAULT CURRENT_TIMESTAMP,
+
+  PRIMARY KEY (token, user_id)
 ) ENGINE=InnoDB;

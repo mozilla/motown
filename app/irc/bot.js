@@ -14,7 +14,6 @@ irc         = require('irc'),
 util        = require('util'),
 Listeners   = require('./bot-listeners'),
 Worker      = require('./bot-worker'),
-uuid        = require('node-uuid'),
 events      = require('events');
 
 require('../../lib/extensions/number');
@@ -50,23 +49,28 @@ function Bot(){
   
   // Contextualize this for annonymous callbacks
   var self = this;
+
+  this.client.setMaxListeners(12);
   
-  this.client.addListener('error',      this.listeners.error);
+  this.client.addListener('error',       this.listeners.error);
 
-  this.client.addListener('close',      this.listeners.connectionClosed);
-  this.client.once('registered',        this.listeners.botRegistered);
+  this.client.addListener('close',       this.listeners.connectionClosed);
+  this.client.once('registered',         this.listeners.botRegistered);
 
-  this.client.addListener('join',       this.listeners.userJoinedMotownChannel);
+  this.client.addListener('join',        this.listeners.userJoinedMotownChannel);
 
-  this.client.addListener('part',       this.listeners.userLeft); // channel, who, reason
-  this.client.addListener('kick',       this.listeners.userLeft); // channel, who, by, reason
-  this.client.addListener('kill',       this.listeners.userDisconnected); // who, reason, channels
-  this.client.addListener('quit',       this.listeners.userDisconnected); // who, reason, channels
+  this.client.addListener('part',        this.listeners.userLeft); // channel, who, reason
+  this.client.addListener('kick',        this.listeners.userLeft); // channel, who, by, reason
+  this.client.addListener('kill',        this.listeners.userDisconnected); // who, reason, channels
+  this.client.addListener('quit',        this.listeners.userDisconnected); // who, reason, channels
 
-  this.client.addListener('nick',       this.listeners.userNickChanged);
-  this.client.addListener('raw',        function(p){logger.silly(p)});
+  this.client.addListener('nick',        this.listeners.userNickChanged);
 
-  this.on('operational', function(){this.state = 'operational'});
+  this.client.addListener('channellist', this.listeners.channelListReturned);
+
+  this.client.addListener('raw',         function(p){logger.silly(p)});
+
+  this.on('operational',                 function(){this.state = 'operational'});
   this.state = "ready";
 }
 

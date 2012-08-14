@@ -19,7 +19,7 @@ require('../../lib/extensions/string');
 
 function User(attrs){
   this.email = (attrs['email'] || '').trim();
-  this.realName = (attrs['realName'] || '').trim();
+  this.realName = (attrs['realName'] || attrs['real_name'] || '').trim();
   this.nick = (attrs['nick'] || '').trim();
   this.gravatarHash = crypto.createHash('md5').update(this.email).digest("hex");
 }
@@ -43,7 +43,7 @@ User.prototype.getGravatarUrl = function(size){
     size = 30;
   }
   var hash = crypto.createHash('md5').update(this.email).digest("hex");
-  return "http://www.gravatar.com/avatar/" + hash + "s=" + size;
+  return "http://www.gravatar.com/avatar/" + hash + "?s=" + size;
 };
 
 User.prototype.save = function(callback){

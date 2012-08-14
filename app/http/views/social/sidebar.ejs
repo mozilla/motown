@@ -105,9 +105,10 @@
           li.find('a').text(contact.realName).attr('href', 'https://mozillians.org/en-US/search?q=' + contact.nick);
           li.find('img').attr('src', contact.gravatar + "?s=30");
 
-          if (!contact.status){
-            contact.status = "online";
-          }
+          // This swaps out an "Online" state instead of the svg
+          // if (!contact.status){
+            // contact.status = "online";
+          // }
 
           if (contact.status){
             li.find('svg').hide();
@@ -223,7 +224,7 @@
           <h2>Contacts</h2>
           <span id="my_status" class="status">
             <svg xmlns="http://www.w3.org/2000/svg" version="1.1">
-              <circle cx="15" cy="15" r="5" stroke-width="0" fill="green" />
+              <circle cx="10" cy="10" r="5" stroke-width="0" fill="green" />
             </svg>
             <button class="btn btn-mini" data-toggle="dropdown" style="display:none;"></button>
           </span>

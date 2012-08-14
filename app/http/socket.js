@@ -152,7 +152,7 @@ function sendContactListToUser(userId){
 }
 
 function sendRecentStories(user){
-  mysql.query("SELECT * FROM stories WHERE user_id = ? AND durable = ? AND seen_at IS NULL ORDER BY published_at DESC LIMIT 30", [user.id, false], function(err, rows){
+  mysql.query("SELECT * FROM stories WHERE user_id = ? AND seen_at IS NULL ORDER BY published_at DESC LIMIT 30", [user.id], function(err, rows){
     if (err){
       logger.error("Error loading stories for user: " + user.email);
       logger.error(err);

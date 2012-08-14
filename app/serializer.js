@@ -139,12 +139,12 @@ function waitForStory(){
                   logger.error("Error publishing notifications.mention.new: " + err);
               });
             }
-            else {
-              pubRedis.publish('feeds.storyForUser', JSON.stringify({'userId': userId, 'story': story}), function(err){
-                if (err)
-                  logger.error(err);
-              });
-            }
+
+            // We always generate a new story for the sidebar
+            pubRedis.publish('feeds.storyForUser', JSON.stringify({'userId': userId, 'story': story}), function(err){
+              if (err)
+                logger.error(err);
+            });
           }
         }
       );

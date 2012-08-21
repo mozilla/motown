@@ -1,5 +1,5 @@
 html, body {
-  
+  overflow: hidden;
 }
 
 body.anonymous {
@@ -81,10 +81,10 @@ body.authenticated #ui {
 
 .feed {
   margin-top: 27px;
-  height: 400px;
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
-
+  clear: both;
+  height: 400px;
 }
 ul {
   margin: 0;
@@ -127,12 +127,20 @@ span svg {
 }
 
 .contacts {
-  overflow-y: auto;
+  overflow-y: scroll;
   overflow-x: hidden;
+  clear: both;
+  height: 400px;
+}
+
+.contacts ul {
+  margin: 0;
+  margin-top: 27px;
 }
 
 .contacts .header {
   background-color: #2c2c2c;
+  position: fixed;
   margin: 0;
   padding: 4px 0 5px 0;
   width: 100%;

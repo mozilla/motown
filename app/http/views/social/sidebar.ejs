@@ -183,11 +183,20 @@
         dump("Sidebar initialized.\n");
       }
 
+      function resizeSidebarPanes(){
+        var halfHeight = Math.floor($(window).height() / 2);
+        $('.feed').height(halfHeight);
+        $('.contacts').height(halfHeight);
+      }
+
+      $(window).resize(resizeSidebarPanes);
+
       $(function(){
         // If user is logged in.
         if (<%= (user != null) %>){
           $('body').addClass('authenticated');
           init();
+          resizeSidebarPanes();
         }
         else{
           $('body').addClass('anonymous');
